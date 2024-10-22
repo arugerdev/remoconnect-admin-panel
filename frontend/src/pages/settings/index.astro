@@ -21,6 +21,7 @@ import Layout from "../../layouts/Layout.astro";
 					id="deviceNameInput"
 					name="deviceName"
 					class="border rounded-lg p-2 w-full"
+					placeholder="Cargando..."
 					required
 				/>
 				<button
@@ -43,8 +44,9 @@ import Layout from "../../layouts/Layout.astro";
 						const response = await fetch("/api/get-device-name");
 						if (response.ok) {
 							const data = await response.json();
-							document.getElementById("deviceNameInput").value =
-								data.deviceName;
+							document.getElementById(
+								"deviceNameInput",
+							).placeholder = data.deviceName;
 						} else {
 							console.error(
 								"Error obteniendo el nombre del dispositivo",
@@ -58,9 +60,6 @@ import Layout from "../../layouts/Layout.astro";
 					}
 				}
 
-				// Llamar a la función cuando la página esté cargada
-				window.onload = loadDeviceName;
-
 				// Manejar la actualización del nombre del dispositivo
 				const form = document.getElementById("deviceNameForm");
 				form.addEventListener("submit", async (e) => {
@@ -72,11 +71,19 @@ import Layout from "../../layouts/Layout.astro";
 					const errorMessage =
 						document.getElementById("errorMessage");
 
+					if (deviceNameInput.length <= 3) {
+						alert("El nombre debe de ser mas largo");
+						return;
+					}
 					try {
 						const response = await fetch("/api/set-device-name", {
 							method: "POST",
-							headers: { "Content-Type": "application/json" },
-							body: JSON.stringify({ newName: deviceNameInput }),
+							headers: {
+								"Content-Type": "application/json",
+							},
+							body: JSON.stringify({
+								newName: deviceNameInput,
+							}),
 						});
 
 						if (response.ok) {
@@ -93,12 +100,6 @@ import Layout from "../../layouts/Layout.astro";
 			</script>
 
 			<style>
-				.success-message {
-					display: none;
-					color: green;
-					margin-top: 10px;
-				}
-
 				.success-message {
 					display: none;
 					color: green;
@@ -232,10 +233,6 @@ import Layout from "../../layouts/Layout.astro";
 			<script defer>
 				const showButton = document.getElementById("show-button");
 				const hideButton = document.getElementById("hide-button");
-				window.onload = () => {
-					showButton.addEventListener("click", showPass);
-					hideButton.addEventListener("click", hidePass);
-				};
 
 				function hidePass() {
 					document.getElementById("password").type = "password";
@@ -273,5 +270,13 @@ import Layout from "../../layouts/Layout.astro";
 				}
 			</script>
 		</section>
+
+		<script defer>
+			window.onload = () => {
+				showButton.addEventListener("click", showPass);
+				hideButton.addEventListener("click", hidePass);
+				loadDeviceName();
+			};
+		</script>
 	</main>
 </Layout>
