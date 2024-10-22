@@ -309,9 +309,15 @@ app.get('/vpn-status', (req, res) => {
     exec('sudo wg show', (error, stdout, stderr) => {
         if (error) {
             console.error(`Error al consultar el estado de la VPN: ${error.message}`);
-            return res.json({ success: false, message: 'Error al consultar la VPN.' });
+            return res.json({ success: false, error: error.message, message: 'Error al consultar la VPN.' });
         }
-        res.json({ success: true, port: stdout.match(/listening\s*port:\s*(.+)/), interface: stdout.match(/interface:\s*(.+)/), allowedIPs: stdout.match(/allowed\s*ips:\s*(.+)/) });
+        res.json({
+            success: true,
+            active: true,
+            port: stdout.match(/listening\s*port:\s*(.+)/)[1],
+            interface: stdout.match(/interface:\s*(.+)/)[1],
+            allowedIPs: stdout.match(/allowed\s*ips:\s*(.+)/)[1]
+        });
     });
 });
 
