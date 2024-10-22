@@ -124,7 +124,7 @@ AllowedIPs = 0.0.0.0/0, ::/0
 Endpoint = ${publicIp}:51820
 PersistentKeepalive = 25`;
 
-        const clientFileName = `${config.deviceName}-client.conf`;
+        const clientFileName = `${config.deviceName}.conf`;
         const clientFilePath = path.join(__dirname, clientFileName);
         fs.writeFileSync(clientFilePath, clientConfig);
 

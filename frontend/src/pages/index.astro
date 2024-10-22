@@ -117,7 +117,6 @@ import Layout from "../layouts/Layout.astro";
 					}
 				}
 
-				window.onload = () => getVpnStatus();
 				setInterval(() => {
 					getVpnStatus();
 				}, 1000);
@@ -208,5 +207,10 @@ import Layout from "../layouts/Layout.astro";
 				margin-top: 10px;
 			}
 		</style>
+		<script defer>
+			window.onload = () => {
+				getVpnStatus();
+			};
+		</script>
 	</main>
 </Layout>
