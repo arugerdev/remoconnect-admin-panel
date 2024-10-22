@@ -5,11 +5,11 @@ import Layout from "../../layouts/Layout.astro";
 
 <Layout title="Panel de administración">
 	<Navbar />
-	<main class="p-8 max-w-screen-xl mx-auto">
+	<main class="p-8 max-w-screen-xl">
 		<h1 class="text-4xl font-extrabold mb-6 text-gray-800">Detalles</h1>
 		<p class="text-lg text-gray-600">Estado del sistema y reportes</p>
 
-		<section class="pb-12">
+		<section class="pb-12 pt-4">
 			<div class="mt-6">
 				<h2 class="text-lg font-semibold">Estado de la SIM</h2>
 				<div id="sim-status" class="flex items-center">
@@ -114,7 +114,6 @@ import Layout from "../../layouts/Layout.astro";
 				async function getSystemStatus() {
 					const response = await fetch("/api/system-status");
 					const data = await response.json();
-					console.log(data);
 					const memUsage = (
 						(data.usedMem.replace(" MB", "") /
 							data.totalMem.replace(" MB", "")) *

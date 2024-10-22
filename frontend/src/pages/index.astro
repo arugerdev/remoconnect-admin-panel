@@ -9,8 +9,9 @@ import Layout from "../layouts/Layout.astro";
 		src="https://cdn.jsdelivr.net/npm/flowbite@1.5.0/dist/flowbite.bundle.min.js"
 	></script>
 
-	<main class="p-8 max-w-screen-xl mx-auto">
+	<main class="p-8 max-w-screen-xl">
 		<h1 class="text-4xl font-extrabold mb-6 text-gray-800">General</h1>
+		<p class="text-lg text-gray-600">Estado general del sistema y la red</p>
 
 		<!-- <section class="pb-12">
 			<h2 class="text-2xl font-bold mb-4">Control de VirtualHere</h2>
@@ -50,7 +51,7 @@ import Layout from "../layouts/Layout.astro";
 			</script>
 		</section> -->
 
-		<section class="pb-12">
+		<section class="pb-12 pt-4">
 			<h2 class="text-xl font-semibold mb-4">Administración de VPN</h2>
 
 			<div class="mt-6 pb-4">
@@ -66,6 +67,16 @@ import Layout from "../layouts/Layout.astro";
 				<p id="vpn-status-interface" class="hidden">Cargando...</p>
 				<p id="vpn-status-allowed-ips" class="hidden">Cargando...</p>
 				<p id="vpn-status-port" class="hidden">Cargando...</p>
+			</div>
+			<div class="mt-6 pb-4">
+				<label class="text-md font-semibold"
+					>Información de la VPN</label
+				>
+
+				<p id="vpn-info-net"><b>Red de la VPN:</b> 10.7.0.0/24</p>
+				<p id="vpn-info-raspip">
+					<b>IP de dispositivo en VPN:</b> 10.7.0.1/24
+				</p>
 			</div>
 
 			<script defer>
@@ -106,9 +117,9 @@ import Layout from "../layouts/Layout.astro";
 							statusText.textContent = "Iniciando VPN...";
 						}
 
-						interfacesText.textContent = `Interfaz: ${status.interface}`;
-						portText.textContent = `Puerto de escucha: ${status.port}`;
-						allowedIpsText.textContent = `IPs disponibles: ${status.allowedIPs}`;
+						interfacesText.textContent = `<b>Interfaz:</b> ${status.interface}`;
+						portText.textContent = `<b>Puerto de escucha:</b> ${status.port}`;
+						allowedIpsText.textContent = `<b>IPs disponibles:</b> ${status.allowedIPs}`;
 					} catch (error) {
 						console.error(
 							"Error al obtener el estado de la SIM:",
@@ -116,10 +127,6 @@ import Layout from "../layouts/Layout.astro";
 						);
 					}
 				}
-
-				setInterval(() => {
-					getVpnStatus();
-				}, 1000);
 			</script>
 
 			<button
@@ -132,13 +139,11 @@ import Layout from "../layouts/Layout.astro";
 			</p>
 
 			<script defer>
-				const generateVpnBtn =
-					document.getElementById("generateVpnBtn");
-				const loader = document.getElementById("loader");
-				const successMessage =
-					document.getElementById("successMessage");
+				async function generateVPN() {
+					const loader = document.getElementById("loader");
+					const successMessage =
+						document.getElementById("successMessage");
 
-				generateVpnBtn.addEventListener("click", async () => {
 					loader.style.display = "inline-block"; // Mostrar loader
 					successMessage.style.display = "none"; // Ocultar mensaje de éxito
 
@@ -172,7 +177,7 @@ import Layout from "../layouts/Layout.astro";
 					} finally {
 						loader.style.display = "none"; // Ocultar loader después de completar
 					}
-				});
+				}
 			</script>
 		</section>
 		<style>
@@ -210,6 +215,15 @@ import Layout from "../layouts/Layout.astro";
 		<script defer>
 			window.onload = () => {
 				getVpnStatus();
+
+				setInterval(() => {
+					getVpnStatus();
+				}, 1000);
+
+				const generateVpnBtn =
+					document.getElementById("generateVpnBtn");
+
+				generateVpnBtn.addEventListener("click", generateVPN);
 			};
 		</script>
 	</main>
