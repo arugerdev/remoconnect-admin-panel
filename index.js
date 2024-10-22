@@ -311,7 +311,7 @@ app.get('/vpn-status', (req, res) => {
             console.error(`Error al consultar el estado de la VPN: ${error.message}`);
             return res.json({ success: false, message: 'Error al consultar la VPN.' });
         }
-        res.json({ success: true, port: stdout.match(/allowed\s*ips:\s*(.+)/), interface: null, allowedIPs: null });
+        res.json({ success: true, port: stdout.match(/listening\s*port:\s*(.+)/), interface: stdout.match(/interface:\s*(.+)/), allowedIPs: stdout.match(/allowed\s*ips:\s*(.+)/) });
     });
 });
 
