@@ -1,0 +1,234 @@
+---
+import Navbar from "../../components/Navbar.astro";
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout title="Panel de administración">
+	<Navbar />
+	<script
+		src="https://cdn.jsdelivr.net/npm/flowbite@1.5.0/dist/flowbite.bundle.min.js"
+	></script>
+
+	<main class="p-8 max-w-screen-xl mx-auto">
+		<h1 class="text-4xl font-extrabold mb-6 text-gray-800">Dashboard</h1>
+
+		<!-- <section class="pb-12">
+			<h2 class="text-2xl font-bold mb-4">Control de VirtualHere</h2>
+			<label for="vhSwitch" class="flex items-center cursor-pointer">
+				<input type="checkbox" id="vhSwitch" class="sr-only peer" />
+				<div
+					class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:w-5 after:h-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+				>
+				</div>
+				<span
+					class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300"
+					>Iniciar/Detener VirtualHere</span
+				>
+			</label>
+
+			<script defer>
+				const switchElement = document.getElementById("vhSwitch");
+
+				switchElement.addEventListener("change", function () {
+					const action = this.checked ? "start" : "stop";
+					fetch(`api/virtualhere/${action}`, {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+						},
+					})
+						.then((response) => response.json())
+						.then((data) => {
+							console.log(data.message);
+							alert(data.message);
+						})
+						.catch((error) => {
+							console.error("Error:", error);
+							alert("Error al cambiar el estado de VirtualHere.");
+						});
+				});
+			</script>
+		</section> -->
+		<section class="pb-12">
+			<h2 class="text-xl font-semibold mb-4">Nombre del dispositivo</h2>
+
+			<form
+				action="javascript:void(0)"
+				class="flex flex-col gap-2 max-w-[256px]"
+				id="deviceNameForm"
+			>
+				<label for="deviceNameInput" class="pb-2"
+					>Nombre del dispositivo:</label
+				>
+				<input
+					type="text"
+					id="deviceNameInput"
+					name="deviceName"
+					class="border rounded-lg p-2 w-full"
+					required
+				/>
+				<button
+					class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 max-w-fit"
+					type="submit">Actualizar nombre</button
+				>
+			</form>
+
+			<p id="successMessage" class="success-message">
+				Nombre actualizado correctamente.
+			</p>
+			<p id="errorMessage" class="error-message">
+				Error actualizando el nombre.
+			</p>
+
+			<script defer>
+				// Cargar el nombre actual del dispositivo al cargar la página
+				async function loadDeviceName() {
+					try {
+						const response = await fetch("/api/get-device-name");
+						if (response.ok) {
+							const data = await response.json();
+							document.getElementById("deviceNameInput").value =
+								data.deviceName;
+						} else {
+							console.error(
+								"Error obteniendo el nombre del dispositivo",
+							);
+						}
+					} catch (error) {
+						console.error(
+							"Error conectando con el servidor:",
+							error,
+						);
+					}
+				}
+
+				// Llamar a la función cuando la página esté cargada
+				window.onload = loadDeviceName;
+
+				// Manejar la actualización del nombre del dispositivo
+				const form = document.getElementById("deviceNameForm");
+				form.addEventListener("submit", async (e) => {
+					e.preventDefault();
+					const deviceNameInput =
+						document.getElementById("deviceNameInput").value;
+					const successMessage =
+						document.getElementById("successMessage");
+					const errorMessage =
+						document.getElementById("errorMessage");
+
+					try {
+						const response = await fetch("/api/set-device-name", {
+							method: "POST",
+							headers: { "Content-Type": "application/json" },
+							body: JSON.stringify({ newName: deviceNameInput }),
+						});
+
+						if (response.ok) {
+							successMessage.style.display = "block";
+							errorMessage.style.display = "none";
+						} else {
+							throw new Error("Error al actualizar el nombre");
+						}
+					} catch (error) {
+						successMessage.style.display = "none";
+						errorMessage.style.display = "block";
+					}
+				});
+			</script>
+		</section>
+		<section class="pb-12">
+			<h2 class="text-xl font-semibold mb-4">Administración de VPN</h2>
+
+			<button
+				class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600"
+				id="generateVpnBtn">Generar archivo de cliente VPN</button
+			>
+			<div class="loader" id="loader"></div>
+			<p id="successMessage" class="success-message">
+				Archivo VPN generado correctamente.
+			</p>
+
+			<script defer>
+				const generateVpnBtn =
+					document.getElementById("generateVpnBtn");
+				const loader = document.getElementById("loader");
+				const successMessage =
+					document.getElementById("successMessage");
+
+				generateVpnBtn.addEventListener("click", async () => {
+					loader.style.display = "inline-block"; // Mostrar loader
+					successMessage.style.display = "none"; // Ocultar mensaje de éxito
+
+					try {
+						// Realizar la petición para generar el archivo del cliente VPN
+						const response = await fetch(
+							"/api/download-vpn-client",
+						);
+
+						if (response.ok) {
+							const blob = await response.blob();
+							const url = window.URL.createObjectURL(blob);
+							const a = document.createElement("a");
+							a.href = url;
+							const deviceNameInput =
+								document.getElementById(
+									"deviceNameInput",
+								).value;
+							a.download = `${deviceNameInput}.conf`;
+							document.body.appendChild(a);
+							a.click();
+							a.remove();
+
+							// Mostrar mensaje de éxito
+							successMessage.style.display = "block";
+						} else {
+							alert("Error generando el archivo VPN");
+						}
+					} catch (error) {
+						alert("Error en la conexión con el servidor");
+					} finally {
+						loader.style.display = "none"; // Ocultar loader después de completar
+					}
+				});
+			</script>
+		</section>
+		<style>
+			/* Loader y mensaje de éxito */
+			.loader {
+				border: 4px solid #f3f3f3;
+				border-top: 4px solid #3498db;
+				border-radius: 50%;
+				width: 30px;
+				height: 30px;
+				animation: spin 2s linear infinite;
+				display: none;
+			}
+
+			@keyframes spin {
+				0% {
+					transform: rotate(0deg);
+				}
+				100% {
+					transform: rotate(360deg);
+				}
+			}
+
+			.success-message {
+				display: none;
+				color: green;
+				margin-top: 10px;
+			}
+
+			.success-message {
+				display: none;
+				color: green;
+				margin-top: 10px;
+			}
+			.error-message {
+				display: none;
+				color: red;
+				margin-top: 10px;
+			}
+		</style>
+	</main>
+</Layout>
