@@ -202,8 +202,6 @@ app.post('/set-device-name', express.json(), (req, res) => {
     }
 });
 
-
-
 // Ruta para reiniciar WireGuard después de la configuración
 app.post('/restart-wireguard', (req, res) => {
     restartWireguard()
@@ -308,12 +306,12 @@ app.get('/system-status', (req, res) => {
 });
 
 app.get('/vpn-status', (req, res) => {
-    exec('wg show', (error, stdout, stderr) => {
+    exec('sudo wg show', (error, stdout, stderr) => {
         if (error) {
             console.error(`Error al consultar el estado de la VPN: ${error.message}`);
             return res.json({ success: false, message: 'Error al consultar la VPN.' });
         }
-        res.json({ success: true, data: stdout });
+        res.json({ success: true, port: stdout.match(/allowed\s*ips:\s*(.+)/), interface: null, allowedIPs: null });
     });
 });
 
@@ -372,7 +370,6 @@ app.post('/verify-password', async (req, res) => {
         res.status(500).send('Error reading password from config file');
     }
 });
-
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);

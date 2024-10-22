@@ -6,7 +6,111 @@ import Layout from "../../layouts/Layout.astro";
 <Layout title="Panel de administración">
 	<Navbar />
 	<main class="p-8 max-w-screen-xl mx-auto">
-		<h1 class="text-4xl font-extrabold mb-6 text-gray-800">Settings</h1>
+		<h1 class="text-4xl font-extrabold mb-6 text-gray-800">Ajustes</h1>
+
+		<section class="pb-12">
+			<h2 class="text-xl font-semibold mb-4">Nombre del dispositivo</h2>
+
+			<form
+				action="javascript:void(0)"
+				class="flex flex-col gap-2 max-w-[256px]"
+				id="deviceNameForm"
+			>
+				<input
+					type="text"
+					id="deviceNameInput"
+					name="deviceName"
+					class="border rounded-lg p-2 w-full"
+					required
+				/>
+				<button
+					class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 max-w-fit"
+					type="submit">Actualizar nombre</button
+				>
+			</form>
+
+			<p id="successMessage" class="success-message">
+				Nombre actualizado correctamente.
+			</p>
+			<p id="errorMessage" class="error-message">
+				Error actualizando el nombre.
+			</p>
+
+			<script defer>
+				// Cargar el nombre actual del dispositivo al cargar la página
+				async function loadDeviceName() {
+					try {
+						const response = await fetch("/api/get-device-name");
+						if (response.ok) {
+							const data = await response.json();
+							document.getElementById("deviceNameInput").value =
+								data.deviceName;
+						} else {
+							console.error(
+								"Error obteniendo el nombre del dispositivo",
+							);
+						}
+					} catch (error) {
+						console.error(
+							"Error conectando con el servidor:",
+							error,
+						);
+					}
+				}
+
+				// Llamar a la función cuando la página esté cargada
+				window.onload = loadDeviceName;
+
+				// Manejar la actualización del nombre del dispositivo
+				const form = document.getElementById("deviceNameForm");
+				form.addEventListener("submit", async (e) => {
+					e.preventDefault();
+					const deviceNameInput =
+						document.getElementById("deviceNameInput").value;
+					const successMessage =
+						document.getElementById("successMessage");
+					const errorMessage =
+						document.getElementById("errorMessage");
+
+					try {
+						const response = await fetch("/api/set-device-name", {
+							method: "POST",
+							headers: { "Content-Type": "application/json" },
+							body: JSON.stringify({ newName: deviceNameInput }),
+						});
+
+						if (response.ok) {
+							successMessage.style.display = "block";
+							errorMessage.style.display = "none";
+						} else {
+							throw new Error("Error al actualizar el nombre");
+						}
+					} catch (error) {
+						successMessage.style.display = "none";
+						errorMessage.style.display = "block";
+					}
+				});
+			</script>
+
+			<style>
+				.success-message {
+					display: none;
+					color: green;
+					margin-top: 10px;
+				}
+
+				.success-message {
+					display: none;
+					color: green;
+					margin-top: 10px;
+				}
+				.error-message {
+					display: none;
+					color: red;
+					margin-top: 10px;
+				}
+			</style>
+		</section>
 
 		<section class="pb-12">
 			<h2 class="text-2xl font-bold mb-4">Reiniciar</h2>
@@ -55,7 +159,7 @@ import Layout from "../../layouts/Layout.astro";
 			</script>
 		</section>
 		<section class="pb-12">
-			<h2 class="text-2xl font-bold mb-4">Change Password</h2>
+			<h2 class="text-2xl font-bold mb-4">Cambiar Contraseña</h2>
 			<form
 				action="javascript:void(0)"
 				onsubmit="handleChangePassword(event)"
@@ -63,7 +167,7 @@ import Layout from "../../layouts/Layout.astro";
 			>
 				<div class="mb-4">
 					<label for="password" class="block text-gray-700"
-						>New Password</label
+						>Nueva Contraseña</label
 					>
 					<div class="flex flex-direction">
 						<input
@@ -121,7 +225,7 @@ import Layout from "../../layouts/Layout.astro";
 				<button
 					type="submit"
 					class="bg-blue-500 text-white px-4 py-2 rounded"
-					>Change Password</button
+					>Nueva Contraseña</button
 				>
 			</form>
 
