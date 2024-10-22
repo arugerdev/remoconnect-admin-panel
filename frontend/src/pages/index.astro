@@ -117,9 +117,9 @@ import Layout from "../layouts/Layout.astro";
 							statusText.textContent = "Iniciando VPN...";
 						}
 
-						interfacesText.textContent = `<b>Interfaz:</b> ${status.interface}`;
-						portText.textContent = `<b>Puerto de escucha:</b> ${status.port}`;
-						allowedIpsText.textContent = `<b>IPs disponibles:</b> ${status.allowedIPs}`;
+						interfacesText.innerHTML = `<b>Interfaz:</b> ${status.interface}`;
+						portText.innerHTML = `<b>Puerto de escucha:</b> ${status.port}`;
+						allowedIpsText.innerHTML = `<b>IPs disponibles:</b> ${status.allowedIPs}`;
 					} catch (error) {
 						console.error(
 							"Error al obtener el estado de la SIM:",
