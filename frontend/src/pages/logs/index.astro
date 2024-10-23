@@ -45,6 +45,10 @@ import Layout from "../../layouts/Layout.astro";
                         vpnLogsTextArea.scrollTop =
                             vpnLogsTextArea.scrollHeight;
                     };
+
+                    window.onclose = () => {
+                        eventSource.close();
+                    };
                 };
             </script>
         </section>
