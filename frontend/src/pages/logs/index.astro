@@ -5,7 +5,7 @@ import Layout from "../../layouts/Layout.astro";
 
 <Layout title="Panel de administración">
     <Navbar />
-    <main class="p-8 max-w-screen-xl">
+    <main class="p-8 w-full">
         <h1 class="text-4xl font-extrabold mb-6 text-gray-800">Registros</h1>
         <p class="text-lg text-gray-600">
             Logs y registros del sistema o conexiones VPN
@@ -13,12 +13,13 @@ import Layout from "../../layouts/Layout.astro";
 
         <section class="pb-12 pt-4">
             <div class="mt-6">
-                <h2 class="text-lg font-semibold">Registros VPN</h2>
+                <h2 class="text-lg font-semibold pb-4">Registros VPN</h2>
                 <div id="vpn-logs" class="flex items-center">
                     <textarea
+                        readonly
                         name="vpnlogs"
                         id="vpnlogs-textarea"
-                        class="overflow-scroll w-full max-w-screen max-h-[500px] h-full min-h-[400px] min-w-full"
+                        class="overflow-auto w-full max-w-screen max-h-[500px] h-full min-h-[500px] min-w-full rounded-xl bg-[#ddd] overflow-x-hidden resize-none border-1 border-[#AAA] outline-none"
                     ></textarea>
                 </div>
             </div>
@@ -31,13 +32,17 @@ import Layout from "../../layouts/Layout.astro";
                     const eventSource = new EventSource("/api/vpn-logs");
 
                     eventSource.onmessage = function (event) {
-                        console.log(event);
-                        console.log("Nuevo log:", event.data);
                         vpnLogsTextArea.textContent += "\n" + event.data;
+                        vpnLogsTextArea.scrollTop =
+                            vpnLogsTextArea.scrollHeight;
                     };
 
                     eventSource.onerror = function (event) {
+                        vpnLogsTextArea.textContent +=
+                            "ERROR EN LA CONEXIÓN AL SERVIDOR";
                         console.error("Error en la conexión", event);
+                        vpnLogsTextArea.scrollTop =
+                            vpnLogsTextArea.scrollHeight;
                     };
                 };
             </script>
