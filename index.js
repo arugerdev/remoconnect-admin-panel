@@ -144,7 +144,7 @@ PersistentKeepalive = 25`;
     }
 }
 
-function getNewLogEntry() {
+function getNewLogEntry(res) {
     const stats = fs.statSync(vpnLogFilePath);
 
     // Si el archivo de log ha crecido, lee desde la última posición
@@ -183,7 +183,7 @@ app.get('/vpn-logs', (req, res) => {
 
     // Aquí puedes usar setInterval o algún otro mecanismo para comprobar cambios
     const intervalId = setInterval(() => {
-        getNewLogEntry();
+        getNewLogEntry(res);
     }, 100); // Cambia la frecuencia según tus necesidades
 
     // Limpia el intervalo al cerrar la conexión
