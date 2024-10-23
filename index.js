@@ -23,6 +23,7 @@ const wgConfigPath = '/etc/wireguard/wg0.conf'; // Archivo de configuración de 
 const vpnLogFilePath = '/var/log/syslog';
 
 let lastLogPosition = 0; // Variable para rastrear la última posición leída
+let sentLogs = []; // Para almacenar las entradas de log que ya se han enviado
 
 // Función para leer los datos existentes de WireGuard del archivo wg0.conf
 function extractKeysFromWgConfig() {
@@ -144,6 +145,27 @@ PersistentKeepalive = 25`;
     }
 }
 
+function sendVPNLogs(res) {
+    const stats = fs.statSync(vpnLogFilePath);
+
+    // Leer el archivo de log completo al inicio
+    const logData = fs.readFileSync(vpnLogFilePath, 'utf-8');
+    const logEntries = logData.split('\n').filter(Boolean); // Divide en líneas y elimina vacías
+
+    // Envía las entradas existentes al inicio
+    logEntries.forEach((entry) => {
+        if (!sentLogs.includes(entry)) {
+
+            if (!entry.includes('wireguard:')) return
+
+            res.write(`data: ${entry}\n\n`);
+            sentLogs.push(entry); // Añade la entrada a los logs enviados
+        }
+    });
+
+    lastLogPosition = stats.size; // Actualiza la posición inicial
+}
+
 function getVPNLogEntry(res) {
     const stats = fs.statSync(vpnLogFilePath);
 
@@ -160,13 +182,15 @@ function getVPNLogEntry(res) {
         });
 
         logStream.on('end', () => {
-            const logEntries = logData.split('\n').filter(Boolean);
-            lastLogPosition = stats.size;
+            const logEntries = logData.split('\n').filter(Boolean); // Divide en líneas y elimina vacías
+            lastLogPosition = stats.size; // Actualiza la posición del último log leído
             logEntries.forEach((entry) => {
+                if (!sentLogs.includes(entry)) { // Solo envía si no se ha enviado antes
+                    if (!entry.includes('wireguard:')) return
 
-                if (!entry.includes('wireguard:')) return
-
-                res.write(`data: ${entry}\n\n`);
+                    res.write(`data: ${entry}\n\n`);
+                    sentLogs.push(entry); // Añade la entrada a los logs enviados
+                }
             });
         });
     }
@@ -178,10 +202,13 @@ app.get('/vpn-logs', (req, res) => {
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
     lastLogPosition = 0;
+
+    sendLogs(res);
+
     // Aquí puedes usar setInterval o algún otro mecanismo para comprobar cambios
     const intervalId = setInterval(() => {
         getVPNLogEntry(res);
-    }, 1000); // Cambia la frecuencia según tus necesidades
+    }, 300); // Cambia la frecuencia según tus necesidades
 
     // Limpia el intervalo al cerrar la conexión
     req.on('close', () => {
