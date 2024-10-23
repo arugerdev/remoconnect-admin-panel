@@ -13,44 +13,6 @@ import Layout from "../layouts/Layout.astro";
 		<h1 class="text-4xl font-extrabold mb-6 text-gray-800">General</h1>
 		<p class="text-lg text-gray-600">Estado general del sistema y la red</p>
 
-		<!-- <section class="pb-12">
-			<h2 class="text-2xl font-bold mb-4">Control de VirtualHere</h2>
-			<label for="vhSwitch" class="flex items-center cursor-pointer">
-				<input type="checkbox" id="vhSwitch" class="sr-only peer" />
-				<div
-					class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:w-5 after:h-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
-				>
-				</div>
-				<span
-					class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300"
-					>Iniciar/Detener VirtualHere</span
-				>
-			</label>
-
-			<script defer>
-				const switchElement = document.getElementById("vhSwitch");
-
-				switchElement.addEventListener("change", function () {
-					const action = this.checked ? "start" : "stop";
-					fetch(`api/virtualhere/${action}`, {
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
-						},
-					})
-						.then((response) => response.json())
-						.then((data) => {
-							console.log(data.message);
-							alert(data.message);
-						})
-						.catch((error) => {
-							console.error("Error:", error);
-							alert("Error al cambiar el estado de VirtualHere.");
-						});
-				});
-			</script>
-		</section> -->
-
 		<section class="pb-12 pt-4">
 			<h2 class="text-xl font-semibold mb-4">Administración de VPN</h2>
 
@@ -125,7 +87,7 @@ import Layout from "../layouts/Layout.astro";
 						allowedIpsText.innerHTML = `<b>IPs disponibles: </b> ${status.allowedIPs}`;
 					} catch (error) {
 						console.error(
-							"Error al obtener el estado de la SIM:",
+							"Error al obtener el estado de la VPN:",
 							error,
 						);
 					}
