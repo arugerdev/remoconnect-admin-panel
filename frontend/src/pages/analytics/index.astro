@@ -124,6 +124,8 @@ import Layout from "../../layouts/Layout.astro";
 							data.totalDisk.replace("G", "")) *
 						100
 					).toFixed(2);
+
+					const temp = (data.temp.replace(" ºC", "") * 1).toFixed(2);
 					const cpuIndicator =
 						document.getElementById("cpu-indicator");
 					const memIndicator =
@@ -132,8 +134,7 @@ import Layout from "../../layouts/Layout.astro";
 						document.getElementById("disk-indicator");
 					const tempIndicator =
 						document.getElementById("temp-indicator");
-					const uptimeIndicator =
-						document.getElementById("uptime-indicator");
+
 					const cpuUsageText = document.getElementById("cpu-usage");
 					const memUsageText = document.getElementById("mem-usage");
 					const diskUsageText = document.getElementById("disk-usage");
@@ -204,16 +205,13 @@ import Layout from "../../layouts/Layout.astro";
 					}
 
 					// Indicadores visuales para la temperatura
-					if (data.temp.replace(" ºC", "") < 60) {
+					if (temp < 40) {
 						tempIndicator.classList.remove(
 							"bg-yellow-500",
 							"bg-red-500",
 						);
 						tempIndicator.classList.add("bg-green-500");
-					} else if (
-						data.temp.replace(" ºC", "") >= 80 &&
-						data.temp.replace(" ºC", "") < 110
-					) {
+					} else if (temp >= 40 && temp < 60) {
 						tempIndicator.classList.remove(
 							"bg-green-500",
 							"bg-red-500",
