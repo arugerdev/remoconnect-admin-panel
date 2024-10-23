@@ -173,6 +173,7 @@ import Layout from "../layouts/Layout.astro";
 							// Mostrar mensaje de éxito
 							successMessage.style.display = "block";
 						} else {
+							console.error(error);
 							alert("Error generando el archivo VPN");
 						}
 					} catch (error) {
