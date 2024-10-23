@@ -142,6 +142,25 @@ import Layout from "../layouts/Layout.astro";
 			</p>
 
 			<script defer>
+				async function loadDeviceName() {
+					try {
+						const response = await fetch("/api/get-device-name");
+						if (response.ok) {
+							const data = await response.json();
+							return data.deviceName;
+						} else {
+							console.error(
+								"Error obteniendo el nombre del dispositivo",
+							);
+						}
+					} catch (error) {
+						console.error(
+							"Error conectando con el servidor:",
+							error,
+						);
+					}
+				}
+
 				async function generateVPN() {
 					const loader = document.getElementById("loader");
 					const successMessage =
@@ -161,11 +180,8 @@ import Layout from "../layouts/Layout.astro";
 							const url = window.URL.createObjectURL(blob);
 							const a = document.createElement("a");
 							a.href = url;
-							const deviceNameInput =
-								document.getElementById(
-									"deviceNameInput",
-								).value;
-							a.download = `${deviceNameInput}.conf`;
+							const deviceName = await loadDeviceName();
+							a.download = `${deviceName}.conf`;
 							document.body.appendChild(a);
 							a.click();
 							a.remove();
