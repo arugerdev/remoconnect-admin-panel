@@ -144,10 +144,9 @@ PersistentKeepalive = 25`;
     }
 }
 
-function getNewLogEntry(res) {
+function getVPNLogEntry(res) {
     const stats = fs.statSync(vpnLogFilePath);
 
-    // Si el archivo de log ha crecido, lee desde la última posición
     if (stats.size > lastLogPosition) {
         const logStream = fs.createReadStream(vpnLogFilePath, {
             start: lastLogPosition,
@@ -156,19 +155,17 @@ function getNewLogEntry(res) {
 
         let logData = '';
 
-        // Acumula los datos del stream
         logStream.on('data', (chunk) => {
             logData += chunk;
         });
 
-        // Al final del stream, procesa las entradas
         logStream.on('end', () => {
-            const logEntries = logData.split('\n').filter(Boolean); // Divide en líneas y elimina vacías
-            lastLogPosition = stats.size; // Actualiza la posición del último log leído
-            // Envía cada entrada de log como un evento
+            const logEntries = logData.split('\n').filter(Boolean);
+            lastLogPosition = stats.size;
             logEntries.forEach((entry) => {
-                // Aquí puedes formatear el log o hacer cualquier otra lógica antes de enviarlo
-                // Por ejemplo, enviar el log como un objeto JSON
+
+                if (!entry.includes('wireguard:')) return
+
                 res.write(`data: ${entry}\n\n`);
             });
         });
@@ -183,8 +180,8 @@ app.get('/vpn-logs', (req, res) => {
 
     // Aquí puedes usar setInterval o algún otro mecanismo para comprobar cambios
     const intervalId = setInterval(() => {
-        getNewLogEntry(res);
-    }, 100); // Cambia la frecuencia según tus necesidades
+        getVPNLogEntry(res);
+    }, 1000); // Cambia la frecuencia según tus necesidades
 
     // Limpia el intervalo al cerrar la conexión
     req.on('close', () => {
