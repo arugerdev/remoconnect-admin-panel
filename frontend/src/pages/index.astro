@@ -120,13 +120,9 @@ import Layout from "../layouts/Layout.astro";
 							statusIndicator.classList.add("bg-yellow-500");
 							statusText.textContent = "Iniciando VPN...";
 						}
-						interfacesText.firstChild.textContent = "Interfaz: ";
-						interfacesText.textContent = status.interface;
-						portText.firstChild.textContent = "Puerto de escucha: ";
-						portText.textContent = status.port;
-						allowedIpsText.firstChild.textContent =
-							"IPs disponibles: ";
-						allowedIpsText.textContent = status.allowedIPs;
+						interfacesText.innerHTML = `<b>Interfaz: </b> ${status.interface}`;
+						portText.innerHTML = `<b>Puerto de escucha: </b> ${status.port}`;
+						allowedIpsText.innerHTML = `<b>IPs disponibles: </b> ${status.allowedIPs}`;
 					} catch (error) {
 						console.error(
 							"Error al obtener el estado de la SIM:",
