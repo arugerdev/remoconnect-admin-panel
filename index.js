@@ -22,7 +22,7 @@ const configFilePath = '/etc/config.json'; // Archivo único de configuración
 const wgConfigPath = '/etc/wireguard/wg0.conf'; // Archivo de configuración de WireGuard
 const vpnLogFilePath = '/var/log/syslog';
 
-let filePosition = 0;
+let lastLogPosition = 0; // Variable para rastrear la última posición leída
 
 // Función para leer los datos existentes de WireGuard del archivo wg0.conf
 function extractKeysFromWgConfig() {
@@ -144,47 +144,52 @@ PersistentKeepalive = 25`;
     }
 }
 
+function getNewLogEntry() {
+    const stats = fs.statSync(vpnLogFilePath);
+
+    // Si el archivo de log ha crecido, lee desde la última posición
+    if (stats.size > lastLogPosition) {
+        const logStream = fs.createReadStream(vpnLogFilePath, {
+            start: lastLogPosition,
+            end: stats.size,
+        });
+
+        let logData = '';
+
+        // Acumula los datos del stream
+        logStream.on('data', (chunk) => {
+            logData += chunk;
+        });
+
+        // Al final del stream, procesa las entradas
+        logStream.on('end', () => {
+            const logEntries = logData.split('\n').filter(Boolean); // Divide en líneas y elimina vacías
+            lastLogPosition = stats.size; // Actualiza la posición del último log leído
+            // Envía cada entrada de log como un evento
+            logEntries.forEach((entry) => {
+                // Aquí puedes formatear el log o hacer cualquier otra lógica antes de enviarlo
+                // Por ejemplo, enviar el log como un objeto JSON
+                res.write(`data: ${entry}\n\n`);
+            });
+        });
+    }
+}
+
 // Ruta para acceder a los logs en tiempo real
 app.get('/vpn-logs', (req, res) => {
-    // Configurar las cabeceras de respuesta para mantener la conexión abierta
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
 
-    // Inicializar una lectura del archivo desde la última posición conocida
-    const stream = fs.createReadStream(vpnLogFilePath, { start: filePosition });
+    // Aquí puedes usar setInterval o algún otro mecanismo para comprobar cambios
+    const intervalId = setInterval(() => {
+        getNewLogEntry();
+    }, 100); // Cambia la frecuencia según tus necesidades
 
-    // Leer las líneas que ya existen en el archivo
-    const rl = readline.createInterface({ input: stream });
-
-    rl.on('line', (line) => {
-        if (line.includes('wireguard:')) {
-            res.write(line + '\n'); // Enviar solo las líneas relevantes de WireGuard
-        }
-    });
-
-    rl.on('close', () => {
-        // Actualizar la posición de lectura
-        filePosition = fs.statSync(vpnLogFilePath).size;
-    });
-
-    // Monitorear el archivo en tiempo real para nuevos cambios
-    fs.watch(vpnLogFilePath, (eventType, filename) => {
-        if (eventType === 'change') {
-            const stream = fs.createReadStream(vpnLogFilePath, { start: filePosition });
-
-            const rl = readline.createInterface({ input: stream });
-            rl.on('line', (line) => {
-                if (line.includes('wireguard:')) {
-                    res.write(line + '\n'); // Enviar solo las nuevas líneas
-                }
-            });
-
-            rl.on('close', () => {
-                // Actualizar la posición de lectura
-                filePosition = fs.statSync(vpnLogFilePath).size;
-            });
-        }
+    // Limpia el intervalo al cerrar la conexión
+    req.on('close', () => {
+        clearInterval(intervalId);
+        res.end();
     });
 });
 
