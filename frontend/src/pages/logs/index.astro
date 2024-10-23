@@ -32,6 +32,7 @@ import Layout from "../../layouts/Layout.astro";
                     const eventSource = new EventSource("/api/vpn-logs");
 
                     eventSource.onmessage = function (event) {
+                        console.log(eventSource);
                         vpnLogsTextArea.textContent += "\n" + event.data;
                         vpnLogsTextArea.scrollTop =
                             vpnLogsTextArea.scrollHeight;
