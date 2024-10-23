@@ -24,17 +24,21 @@ import Layout from "../../layouts/Layout.astro";
             </div>
 
             <script defer>
-                const vpnLogsTextArea =
-                    document.getElementById("vpnlogs-textarea");
-                const eventSource = new EventSource("/api/vpn-logs");
+                window.onload = () => {
+                    const vpnLogsTextArea =
+                        document.getElementById("vpnlogs-textarea");
 
-                eventSource.onmessage = function (event) {
-                    console.log("Nuevo log:", event.data);
-                    vpnLogsTextArea.textContent += "\n" + event.data;
-                };
+                    const eventSource = new EventSource("/api/vpn-logs");
 
-                eventSource.onerror = function (event) {
-                    console.error("Error en la conexión", event);
+                    eventSource.onmessage = function (event) {
+                        console.log(event);
+                        console.log("Nuevo log:", event.data);
+                        vpnLogsTextArea.textContent += "\n" + event.data;
+                    };
+
+                    eventSource.onerror = function (event) {
+                        console.error("Error en la conexión", event);
+                    };
                 };
             </script>
         </section>
