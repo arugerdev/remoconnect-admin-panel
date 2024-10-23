@@ -203,7 +203,7 @@ app.get('/vpn-logs', (req, res) => {
     res.setHeader('Connection', 'keep-alive');
     lastLogPosition = 0;
 
-    sendLogs(res);
+    sendVPNLogs(res);
 
     // Aquí puedes usar setInterval o algún otro mecanismo para comprobar cambios
     const intervalId = setInterval(() => {
