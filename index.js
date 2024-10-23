@@ -147,7 +147,7 @@ PersistentKeepalive = 25`;
 // Ruta para acceder a los logs en tiempo real
 app.get('/vpn-logs', (req, res) => {
     // Configurar las cabeceras de respuesta para mantener la conexión abierta
-    res.setHeader('Content-Type', 'text/plain');
+    res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
 
