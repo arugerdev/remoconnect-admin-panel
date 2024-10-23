@@ -7,7 +7,7 @@ const bcrypt = require('bcrypt'); // Importar bcrypt
 const cors = require('cors')
 const os = require('os');
 const app = express();
-const yaml = require('js-yaml');
+const readline = require('readline');
 const PORT = 3030;
 
 
@@ -20,7 +20,9 @@ app.use(cors()); // Para permitir peticiones desde el frontend
 
 const configFilePath = '/etc/config.json'; // Archivo único de configuración
 const wgConfigPath = '/etc/wireguard/wg0.conf'; // Archivo de configuración de WireGuard
-const netplanFile = '/etc/netplan/50-cloud-init.yaml';// Archivo netplan
+const vpnLogFilePath = '/var/log/syslog';
+
+let filePosition = 0;
 
 // Función para leer los datos existentes de WireGuard del archivo wg0.conf
 function extractKeysFromWgConfig() {
@@ -142,6 +144,49 @@ PersistentKeepalive = 25`;
     }
 }
 
+// Ruta para acceder a los logs en tiempo real
+app.get('/vpn-logs', (req, res) => {
+    // Configurar las cabeceras de respuesta para mantener la conexión abierta
+    res.setHeader('Content-Type', 'text/plain');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
+    // Inicializar una lectura del archivo desde la última posición conocida
+    const stream = fs.createReadStream(vpnLogFilePath, { start: filePosition });
+
+    // Leer las líneas que ya existen en el archivo
+    const rl = readline.createInterface({ input: stream });
+
+    rl.on('line', (line) => {
+        if (line.includes('wireguard:')) {
+            res.write(line + '\n'); // Enviar solo las líneas relevantes de WireGuard
+        }
+    });
+
+    rl.on('close', () => {
+        // Actualizar la posición de lectura
+        filePosition = fs.statSync(vpnLogFilePath).size;
+    });
+
+    // Monitorear el archivo en tiempo real para nuevos cambios
+    fs.watch(vpnLogFilePath, (eventType, filename) => {
+        if (eventType === 'change') {
+            const stream = fs.createReadStream(vpnLogFilePath, { start: filePosition });
+
+            const rl = readline.createInterface({ input: stream });
+            rl.on('line', (line) => {
+                if (line.includes('wireguard:')) {
+                    res.write(line + '\n'); // Enviar solo las nuevas líneas
+                }
+            });
+
+            rl.on('close', () => {
+                // Actualizar la posición de lectura
+                filePosition = fs.statSync(vpnLogFilePath).size;
+            });
+        }
+    });
+});
 
 // Endpoint para iniciar/detener VirtualHere
 app.post('/virtualhere/:action', (req, res) => {
