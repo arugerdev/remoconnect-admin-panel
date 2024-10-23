@@ -11,6 +11,7 @@ export default defineConfig({
         '/api': {
           target: 'http://localhost:3030', // Puerto de tu servidor Express
           changeOrigin: true,
+          ws: true,
           rewrite: (path) => path.replace(/^\/api/, ''),
         },
       },
