@@ -1,0 +1,42 @@
+---
+import Navbar from "../../components/Navbar.astro";
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout title="Panel de administración">
+    <Navbar />
+    <main class="p-8 max-w-screen-xl">
+        <h1 class="text-4xl font-extrabold mb-6 text-gray-800">Registros</h1>
+        <p class="text-lg text-gray-600">
+            Logs y registros del sistema o conexiones VPN
+        </p>
+
+        <section class="pb-12 pt-4">
+            <div class="mt-6">
+                <h2 class="text-lg font-semibold">Registros VPN</h2>
+                <div id="vpn-logs" class="flex items-center">
+                    <textarea
+                        name="vpnlogs"
+                        id="vpnlogs-textarea"
+                        class="overflow-scroll w-full max-w-screen max-h-[500px] h-full min-h-[400px] min-w-full"
+                    ></textarea>
+                </div>
+            </div>
+
+            <script defer>
+                const vpnLogsTextArea =
+                    document.getElementById("vpnlogs-textarea");
+                const eventSource = new EventSource("/api/logs");
+
+                eventSource.onmessage = function (event) {
+                    console.log("Nuevo log:", event.data);
+                    vpnLogsTextArea.textContent += "\n" + event.data;
+                };
+
+                eventSource.onerror = function (event) {
+                    console.error("Error en la conexión", event);
+                };
+            </script>
+        </section>
+    </main>
+</Layout>

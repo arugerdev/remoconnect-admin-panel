@@ -41,11 +41,20 @@
                         >Detalles</a
                     >
                 </li>
+                <li>
+                    <a
+                        id="logs"
+                        href="/logs"
+                        class="block py-2 pr-4 pl-3 text-gray-300 hover:bg-gray-700 rounded lg:hover:bg-transparent lg:hover:text-white"
+                        >Registros</a
+                    >
+                </li>
             </ul>
             <script defer>
                 const rootA = document.getElementById("root");
                 const settingsA = document.getElementById("settings");
                 const analyticsA = document.getElementById("analytics");
+                const logsA = document.getElementById("logs");
 
                 switch (window.location.pathname) {
                     case "/":
@@ -56,6 +65,9 @@
                         break;
                     case "/analytics":
                         analyticsA.classList.add("font-bold");
+                        break;
+                    case "/logs":
+                        logsA.classList.add("font-bold");
                         break;
                 }
             </script>

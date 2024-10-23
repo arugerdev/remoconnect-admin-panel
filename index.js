@@ -11,7 +11,7 @@ const readline = require('readline');
 const PORT = 3030;
 
 
-const { exec, execSync } = require('child_process')
+const { exec } = require('child_process')
 
 // Middleware
 app.use(bodyParser.json());
