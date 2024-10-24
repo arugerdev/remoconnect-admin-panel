@@ -7,9 +7,7 @@ const bcrypt = require('bcrypt'); // Importar bcrypt
 const cors = require('cors')
 const os = require('os');
 const app = express();
-// const readline = require('readline');
-const chokidar = require('chokidar'); // Librería para monitorear archivos
-
+const readline = require('readline');
 const PORT = 3030;
 
 
@@ -25,7 +23,7 @@ const wgConfigPath = '/etc/wireguard/wg0.conf'; // Archivo de configuración de 
 const logFilePath = '/var/log/syslog';
 
 // let lastLogPosition = 0; // Variable para rastrear la última posición leída
-let sentLogs = []; // Para almacenar las entradas de log que ya se han enviado
+// let sentLogs = []; // Para almacenar las entradas de log que ya se han enviado
 
 // Función para leer los datos existentes de WireGuard del archivo wg0.conf
 function extractKeysFromWgConfig() {
@@ -195,26 +193,67 @@ PersistentKeepalive = 25`;
 //     }
 // }
 
-// // Ruta para acceder a los logs en tiempo real
-// app.get('/vpn-logs', (req, res) => {
-//     res.setHeader('Content-Type', 'text/event-stream');
-//     res.setHeader('Cache-Control', 'no-cache');
-//     res.setHeader('Connection', 'keep-alive');
-//     lastLogPosition = 0;
-//     sentLogs = []
+app.get('/vpn-logs', (req, res) => {
 
-//     sendLogs(res, 'wireguard:', null);
-//     // Aquí puedes usar setInterval o algún otro mecanismo para comprobar cambios
-//     const intervalId = setInterval(() => {
-//         getLogEntry(res, 'wireguard:', null);
-//     }, 1000); // Cambia la frecuencia según tus necesidades
+    // Configuración de headers para Server-Sent Events (SSE)
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
 
-//     // Limpia el intervalo al cerrar la conexión
-//     req.on('close', () => {
-//         clearInterval(intervalId);
-//         res.end();
-//     });
-// });
+    let lastLogPosition = 0;
+    let logData = '';
+    const sentLogs = [];
+
+    const sendLogUpdate = () => {
+        fs.stat(logFilePath, (err, stats) => {
+            if (err) {
+                console.error('Error al obtener información del archivo de logs:', err);
+                return;
+            }
+
+            if (stats.size > lastLogPosition) {
+                const logStream = fs.createReadStream(logFilePath, {
+                    start: lastLogPosition,
+                    end: stats.size
+                });
+
+                logStream.on('data', (chunk) => {
+                    logData += chunk;
+                });
+
+                logStream.on('end', () => {
+                    const logEntries = logData.split('\n').filter(Boolean).filter(e => e.includes('wireguard:'));  // Dividir en líneas y eliminar vacías
+                    lastLogPosition = stats.size;  // Actualizar la posición para leer solo nuevos logs
+
+                    logEntries.forEach((entry) => {
+                        if (!sentLogs.includes(entry)) {
+                            res.write(`data: ${entry}\n\n`);  // Enviar cada línea de log al cliente
+                            sentLogs.push(entry);
+                        }
+                    });
+
+                    logData = '';  // Limpiar la variable después de enviar
+                });
+
+                logStream.on('error', (error) => {
+                    console.error('Error al leer el archivo de logs:', error);
+                });
+            }
+        });
+    };
+
+    // Enviar logs cada 3 segundos
+    const intervalId = setInterval(() => {
+        sendLogUpdate();
+    }, 3000);
+
+    // Manejar cierre de la conexión
+    req.on('close', () => {
+        console.log('Conexión cerrada por el cliente.');
+        clearInterval(intervalId);
+        res.end();
+    });
+});
 // // Ruta para acceder a los logs en tiempo real
 // app.get('/sys-logs', (req, res) => {
 //     res.setHeader('Content-Type', 'text/event-stream');
@@ -235,89 +274,6 @@ PersistentKeepalive = 25`;
 //         res.end();
 //     });
 // });
-
-
-// Función para filtrar y enviar logs nuevos
-function sendNewLogs(logEntry, res, filter = null, noFilter = null) {
-    // Filtrar logs basados en el filtro y noFilter si existen
-    if ((filter ? logEntry.includes(filter) : true) && (noFilter ? !logEntry.includes(noFilter) : true)) {
-        // Verifica si el log ya fue enviado
-        if (!sentLogs.includes(logEntry)) {
-            res.write(`data: ${logEntry}\n\n`);
-            sentLogs.push(logEntry); // Añadir a los logs enviados
-        }
-    }
-}
-
-// Ruta para acceder a los logs de WireGuard en tiempo real
-app.get('/vpn-logs', (req, res) => {
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
-    sentLogs = []; // Reiniciar los logs enviados
-
-    // Monitorear el archivo de logs usando chokidar
-    const watcher = chokidar.watch(logFilePath, {
-        persistent: true,
-        ignoreInitial: true, // Ignorar el contenido inicial del archivo
-        usePolling: true, // Utilizar polling para asegurar que los cambios se detecten
-        interval: 1000, // Frecuencia de polling
-    });
-
-    watcher.on('change', (path) => {
-        const logStream = fs.createReadStream(logFilePath, { encoding: 'utf-8' });
-
-        logStream.on('data', (chunk) => {
-            const logEntries = chunk.split('\n').filter(Boolean);
-            logEntries.forEach(entry => sendNewLogs(entry, res, 'wireguard:')); // Filtrar solo logs de WireGuard
-        });
-
-        logStream.on('end', () => {
-            logStream.close(); // Cerrar el stream después de leer
-        });
-    });
-
-    // Cerrar el stream y detener el watcher cuando el cliente cierre la conexión
-    req.on('close', () => {
-        watcher.close();
-        res.end();
-    });
-});
-
-// Ruta para acceder a otros logs en tiempo real
-app.get('/sys-logs', (req, res) => {
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
-    sentLogs = []; // Reiniciar los logs enviados
-
-    // Monitorear el archivo de logs usando chokidar
-    const watcher = chokidar.watch(logFilePath, {
-        persistent: true,
-        ignoreInitial: true, // Ignorar el contenido inicial del archivo
-        usePolling: true,
-        interval: 1000,
-    });
-
-    watcher.on('change', (path) => {
-        const logStream = fs.createReadStream(logFilePath, { encoding: 'utf-8' });
-
-        logStream.on('data', (chunk) => {
-            const logEntries = chunk.split('\n').filter(Boolean);
-            logEntries.forEach(entry => sendNewLogs(entry, res, null, 'wireguard:')); // Excluir logs de WireGuard
-        });
-
-        logStream.on('end', () => {
-            logStream.close();
-        });
-    });
-
-    // Cerrar el stream y detener el watcher cuando el cliente cierre la conexión
-    req.on('close', () => {
-        watcher.close();
-        res.end();
-    });
-});
 
 // Endpoint para iniciar/detener VirtualHere
 app.post('/virtualhere/:action', (req, res) => {
