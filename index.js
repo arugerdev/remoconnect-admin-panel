@@ -275,6 +275,68 @@ app.get('/vpn-logs', (req, res) => {
 //     });
 // });
 
+app.get('/sys-logs', (req, res) => {
+
+    // Configuración de headers para Server-Sent Events (SSE)
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
+    let lastLogPosition = 0;
+    let logData = '';
+    const sentLogs = [];
+
+    const sendLogUpdate = () => {
+        fs.stat(logFilePath, (err, stats) => {
+            if (err) {
+                console.error('Error al obtener información del archivo de logs:', err);
+                return;
+            }
+
+            if (stats.size > lastLogPosition) {
+                const logStream = fs.createReadStream(logFilePath, {
+                    start: lastLogPosition,
+                    end: stats.size
+                });
+
+                logStream.on('data', (chunk) => {
+                    logData += chunk;
+                });
+
+                logStream.on('end', () => {
+                    const logEntries = logData.split('\n').filter(Boolean).filter(e => !e.includes('wireguard:'));  // Dividir en líneas y eliminar vacías
+                    lastLogPosition = stats.size;  // Actualizar la posición para leer solo nuevos logs
+
+                    logEntries.forEach((entry) => {
+                        if (!sentLogs.includes(entry)) {
+                            res.write(`data: ${entry}\n\n`);  // Enviar cada línea de log al cliente
+                            sentLogs.push(entry);
+                        }
+                    });
+
+                    logData = '';  // Limpiar la variable después de enviar
+                });
+
+                logStream.on('error', (error) => {
+                    console.error('Error al leer el archivo de logs:', error);
+                });
+            }
+        });
+    };
+
+    // Enviar logs cada 3 segundos
+    const intervalId = setInterval(() => {
+        sendLogUpdate();
+    }, 3000);
+
+    // Manejar cierre de la conexión
+    req.on('close', () => {
+        console.log('Conexión cerrada por el cliente.');
+        clearInterval(intervalId);
+        res.end();
+    });
+});
+
 // Endpoint para iniciar/detener VirtualHere
 app.post('/virtualhere/:action', (req, res) => {
     const action = req.params['action'];
