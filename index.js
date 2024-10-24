@@ -153,10 +153,8 @@ function sendLogs(res, filter = null, noFilter = null) {
     const logEntries = logData.split('\n').filter(Boolean); // Divide en líneas y elimina vacías
 
     // Envía las entradas existentes al inicio
-    logEntries.forEach((entry) => {
+    logEntries.filter((i) => ((filter ? i.includes(filter) : true) && (noFilter ? !i.includes(noFilter) : true))).forEach((entry) => {
         if (!sentLogs.includes(entry)) {
-            if (noFilter && !entry.includes(noFilter)) return
-            if (filter && entry.includes(filter)) return
 
             res.write(`data: ${entry}\n\n`);
             sentLogs.push(entry); // Añade la entrada a los logs enviados
@@ -184,10 +182,8 @@ function getLogEntry(res, filter = null, noFilter = null) {
         logStream.on('end', () => {
             const logEntries = logData.split('\n').filter(Boolean); // Divide en líneas y elimina vacías
             lastLogPosition = stats.size; // Actualiza la posición del último log leído
-            logEntries.forEach((entry) => {
+            logEntries.filter((i) => ((filter ? i.includes(filter) : true) && (noFilter ? !i.includes(noFilter) : true))).forEach((entry) => {
                 if (!sentLogs.includes(entry)) { // Solo envía si no se ha enviado antes
-                    if (noFilter && !entry.includes(noFilter)) return
-                    if (filter && entry.includes(filter)) return
 
                     res.write(`data: ${entry}\n\n`);
                     sentLogs.push(entry); // Añade la entrada a los logs enviados
@@ -209,7 +205,7 @@ app.get('/vpn-logs', (req, res) => {
     // Aquí puedes usar setInterval o algún otro mecanismo para comprobar cambios
     const intervalId = setInterval(() => {
         getLogEntry(res, null, 'wireguard:');
-    }, 300); // Cambia la frecuencia según tus necesidades
+    }, 1000); // Cambia la frecuencia según tus necesidades
 
     // Limpia el intervalo al cerrar la conexión
     req.on('close', () => {
@@ -229,7 +225,7 @@ app.get('/sys-logs', (req, res) => {
     // Aquí puedes usar setInterval o algún otro mecanismo para comprobar cambios
     const intervalId = setInterval(() => {
         getLogEntry(res, 'wireguard:', null);
-    }, 300); // Cambia la frecuencia según tus necesidades
+    }, 1000); // Cambia la frecuencia según tus necesidades
 
     // Limpia el intervalo al cerrar la conexión
     req.on('close', () => {
