@@ -60,6 +60,9 @@ async function generateConfigFile() {
                 firstRun: true,
                 passwordHash: "",
                 wireGuardConfigPath: wgConfigPath
+            },
+            simConfig: {
+                pin: '0000'
             }
         };
 
@@ -373,6 +376,36 @@ app.get('/get-device-name', (req, res) => {
     } catch (error) {
         console.error('Error obteniendo el nombre del dispositivo:', error);
         res.status(500).send('Error obteniendo el nombre del dispositivo');
+    }
+});
+// Endpoint para obtener el pin de la sim desde el archivo de configuración
+app.get('/get-sim-pin', (req, res) => {
+    try {
+        const config = JSON.parse(fs.readFileSync(configFilePath, 'utf-8'));
+        res.status(200).json({ simPin: config.simConfig.simPin });
+    } catch (error) {
+        console.error('Error obteniendo el pin de la sim:', error);
+        res.status(500).send('Error obteniendo el pin de la sim');
+    }
+});
+
+// Endpoint para actualizar el nombre del dispositivo en el archivo de configuración
+app.post('/set-sim-pin', express.json(), (req, res) => {
+    const { newPin } = req.body;
+    if (!newPin || typeof newPin !== 'string') {
+        return res.status(400).send('Pin invalido');
+    }
+
+    try {
+        const config = JSON.parse(fs.readFileSync(configFilePath, 'utf-8'));
+        config.simConfig.simPin = newPin;
+
+        // Guardar el nuevo nombre en el archivo de configuración
+        fs.writeFileSync(configFilePath, JSON.stringify(config, null, 2));
+        res.status(200).send('Pin actualizado correctamente');
+    } catch (error) {
+        console.error('Error actualizando Pin:', error);
+        res.status(500).send('Error actualizando Pin');
     }
 });
 
