@@ -382,7 +382,7 @@ app.get('/get-device-name', (req, res) => {
 app.get('/get-sim-pin', (req, res) => {
     try {
         const config = JSON.parse(fs.readFileSync(configFilePath, 'utf-8'));
-        res.status(200).json({ simPin: config.simConfig.simPin });
+        res.status(200).json({ simPin: config.simConfig.pin });
     } catch (error) {
         console.error('Error obteniendo el pin de la sim:', error);
         res.status(500).send('Error obteniendo el pin de la sim');
