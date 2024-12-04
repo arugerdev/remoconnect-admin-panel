@@ -104,12 +104,6 @@ async function generateVpnClient(req, res) {
         const publicKeyMatch = clientConf.match(/PublicKey\s*=\s*(.+)/);
         const presharedKeyMatch = clientConf.match(/PresharedKey\s*=\s*(.+)/);
 
-        config.vpnConfig.privateKey = privateKeyMatch;
-        config.vpnConfig.publicKey = publicKeyMatch;
-        config.vpnConfig.presharedKey = presharedKeyMatch;
-
-        // Guardar la nueva configuración en el archivo config.json
-        fs.writeFileSync(configFilePath, JSON.stringify(config, null, 2));
         
         if (!privateKeyMatch || !publicKeyMatch || !presharedKeyMatch) {
             throw new Error('No se encontraron las claves en /root/client.conf');
@@ -119,6 +113,13 @@ async function generateVpnClient(req, res) {
         const publicKey = publicKeyMatch[1].trim();
         const presharedKey = presharedKeyMatch[1].trim();
 
+        config.vpnConfig.privateKey = privateKey;
+        config.vpnConfig.publicKey = publicKey;
+        config.vpnConfig.presharedKey = presharedKey;
+
+        // Guardar la nueva configuración en el archivo config.json
+        fs.writeFileSync(configFilePath, JSON.stringify(config, null, 2));
+        
         // Cambiar la configuración de WireGuard del servidor (no cliente)
         const wgConfig = fs.readFileSync(wgConfigPath, 'utf-8');
         const newWgConfig = wgConfig.replace(/Endpoint = .*/, `Endpoint = ${publicIp}:51820`);
