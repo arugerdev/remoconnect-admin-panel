@@ -30,11 +30,12 @@ const logFilePath = '/var/log/syslog';
         const config = JSON.parse(fs.readFileSync(configFilePath, 'utf-8')).systemConfig;
 
         applyNetplanConfig(config);
+        console.error('Netplan Configurado');
 
-        res.status(200).send('Configuración de Netplan aplicada correctamente.');
+        // res.status(200).send('Configuración de Netplan aplicada correctamente.');
     } catch (error) {
         console.error('Error configurando Netplan:', error);
-        res.status(500).send('Error configurando Netplan.');
+        // res.status(500).send('Error configurando Netplan.');
     }
 
 // Función para leer los datos existentes de WireGuard del archivo wg0.conf
