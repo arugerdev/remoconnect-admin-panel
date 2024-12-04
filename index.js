@@ -22,6 +22,7 @@ app.use(cors()); // Para permitir peticiones desde el frontend
 const configFilePath = '/etc/config.json'; // Archivo único de configuración
 const wgConfigPath = '/etc/wireguard/wg0.conf'; // Archivo de configuración de WireGuard
 const logFilePath = '/var/log/syslog';
+const netplanConfigPath = '/etc/netplan/50-cloud-init.yaml';
 
 // let lastLogPosition = 0; // Variable para rastrear la última posición leída
 // let sentLogs = []; // Para almacenar las entradas de log que ya se han enviado
