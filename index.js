@@ -112,13 +112,6 @@ async function generateVpnClient(req, res) {
         const privateKey = privateKeyMatch[1].trim();
         const publicKey = publicKeyMatch[1].trim();
         const presharedKey = presharedKeyMatch[1].trim();
-
-        config.vpnConfig.privateKey = privateKey;
-        config.vpnConfig.publicKey = publicKey;
-        config.vpnConfig.presharedKey = presharedKey;
-
-        // Guardar la nueva configuración en el archivo config.json
-        fs.writeFileSync(configFilePath, JSON.stringify(config, null, 2));
         
         // Cambiar la configuración de WireGuard del servidor (no cliente)
         const wgConfig = fs.readFileSync(wgConfigPath, 'utf-8');
