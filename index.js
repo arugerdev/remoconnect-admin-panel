@@ -1,9 +1,10 @@
 // server.js
+const YAML = require('yaml');
 const express = require('express');
 const bodyParser = require('body-parser');
 const fs = require('fs');
 const path = require('path');
-const bcrypt = require('bcrypt'); // Importar bcrypt
+const bcrypt = require('bcrypt');
 const cors = require('cors')
 const os = require('os');
 const app = express();
@@ -24,6 +25,17 @@ const logFilePath = '/var/log/syslog';
 
 // let lastLogPosition = 0; // Variable para rastrear la última posición leída
 // let sentLogs = []; // Para almacenar las entradas de log que ya se han enviado
+
+ try {
+        const config = JSON.parse(fs.readFileSync(configFilePath, 'utf-8')).systemConfig;
+
+        applyNetplanConfig(config);
+
+        res.status(200).send('Configuración de Netplan aplicada correctamente.');
+    } catch (error) {
+        console.error('Error configurando Netplan:', error);
+        res.status(500).send('Error configurando Netplan.');
+    }
 
 // Función para leer los datos existentes de WireGuard del archivo wg0.conf
 function extractKeysFromWgConfig() {
@@ -59,7 +71,30 @@ async function generateConfigFile() {
             systemConfig: {
                 firstRun: true,
                 passwordHash: "",
-                wireGuardConfigPath: wgConfigPath
+                wireGuardConfigPath: wgConfigPath,
+                ipAddress: "192.168.1.100/24",
+                gateway: "192.168.1.1",
+                dns: ["8.8.8.8", "8.8.4.4"],
+                interfaces: [
+                {
+                    name: "eth0",
+                    type: "ethernet",
+                    method: "static"
+                },
+                {
+                    name: "wlan0",
+                    type: "wifi",
+                    ssid: "MyWiFiNetwork",
+                    password: "SecurePassword",
+                    method: "dhcp"
+                },
+                {
+                    name: "ppp0",
+                    type: "modem",
+                    method: "ppp",
+                    provider: "vodafone"
+                }
+            ]
             },
             simConfig: {
                 pin: '0000'
@@ -196,6 +231,62 @@ PersistentKeepalive = 25`;
 //         });
 //     }
 // }
+
+function generateNetplanConfig(config) {
+    const netplan = {
+        network: {
+            version: 2,
+            ethernets: {},
+            wifis: {},
+            modems: {},
+        },
+    };
+
+    config.interfaces.forEach((iface) => {
+        if (iface.type === "ethernet") {
+            netplan.network.ethernets[iface.name] = {
+                dhcp4: iface.method === "dhcp",
+                addresses: iface.method === "static" ? [config.ipAddress] : undefined,
+                gateway4: iface.method === "static" ? config.gateway : undefined,
+                nameservers: iface.method === "static" ? { addresses: config.dns } : undefined,
+            };
+        } else if (iface.type === "wifi") {
+            netplan.network.wifis[iface.name] = {
+                access_points: {
+                    [iface.ssid]: {
+                        password: iface.password,
+                    },
+                },
+                dhcp4: iface.method === "dhcp",
+                addresses: iface.method === "static" ? [config.ipAddress] : undefined,
+                gateway4: iface.method === "static" ? config.gateway : undefined,
+                nameservers: iface.method === "static" ? { addresses: config.dns } : undefined,
+            };
+        } else if (iface.type === "modem") {
+            // Aquí podríamos manejar módems usando configuraciones manuales (fuera de Netplan)
+            // Por ejemplo, generar un archivo para wvdial o pppd
+            console.log(`Configurar manualmente el módem en: ${iface.name}`);
+        }
+    });
+
+    return YAML.stringify(netplan);
+}
+
+function applyNetplanConfig(config) {
+    const yamlConfig = generateNetplanConfig(config);
+
+    // Escribir el archivo de configuración
+    fs.writeFileSync(netplanConfigPath, yamlConfig);
+
+    // Aplicar la nueva configuración
+    exec('sudo netplan apply', (error) => {
+        if (error) {
+            console.error('Error aplicando configuración de Netplan:', error);
+            throw new Error('Error aplicando configuración de Netplan');
+        }
+    });
+}
+
 
 app.get('/vpn-logs', (req, res) => {
 
