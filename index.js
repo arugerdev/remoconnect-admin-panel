@@ -61,6 +61,8 @@ async function generateConfigFile() {
                 firstRun: true,
                 passwordHash: "",
                 wireGuardConfigPath: wgConfigPath,
+            },
+            networkConfig: {
                 ipAddress: "192.168.1.100/24",
                 gateway: "192.168.1.1",
                 dns: ["8.8.8.8", "8.8.4.4"],
@@ -83,7 +85,7 @@ async function generateConfigFile() {
                     method: "ppp",
                     provider: "vodafone"
                 }
-            ]
+                ]
             },
             simConfig: {
                 pin: '0000'
@@ -702,7 +704,7 @@ app.listen(PORT, () => {
     }
 
     try {
-        const config = JSON.parse(fs.readFileSync(configFilePath, 'utf-8')).systemConfig;
+        const config = JSON.parse(fs.readFileSync(configFilePath, 'utf-8')).networkConfig;
 
         applyNetplanConfig(config);
         console.error('Netplan Configurado');
