@@ -26,18 +26,6 @@ const logFilePath = '/var/log/syslog';
 // let lastLogPosition = 0; // Variable para rastrear la última posición leída
 // let sentLogs = []; // Para almacenar las entradas de log que ya se han enviado
 
- try {
-        const config = JSON.parse(fs.readFileSync(configFilePath, 'utf-8')).systemConfig;
-
-        applyNetplanConfig(config);
-        console.error('Netplan Configurado');
-
-        // res.status(200).send('Configuración de Netplan aplicada correctamente.');
-    } catch (error) {
-        console.error('Error configurando Netplan:', error);
-        // res.status(500).send('Error configurando Netplan.');
-    }
-
 // Función para leer los datos existentes de WireGuard del archivo wg0.conf
 function extractKeysFromWgConfig() {
     const wgConfigContent = fs.readFileSync(wgConfigPath, 'utf-8');
@@ -712,4 +700,17 @@ app.listen(PORT, () => {
     if (!fs.existsSync(configFilePath)) {
         generateConfigFile();
     }
+
+    try {
+        const config = JSON.parse(fs.readFileSync(configFilePath, 'utf-8')).systemConfig;
+
+        applyNetplanConfig(config);
+        console.error('Netplan Configurado');
+
+        // res.status(200).send('Configuración de Netplan aplicada correctamente.');
+    } catch (error) {
+        console.error('Error configurando Netplan:', error);
+        // res.status(500).send('Error configurando Netplan.');
+    }
+
 });
