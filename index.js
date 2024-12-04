@@ -1,5 +1,5 @@
 // server.js
-const YAML = require('yaml');
+const YAML = require('js-yaml');
 const express = require('express');
 const bodyParser = require('body-parser');
 const fs = require('fs');
