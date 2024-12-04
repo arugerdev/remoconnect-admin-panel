@@ -64,7 +64,7 @@ async function generateConfigFile() {
                 wireGuardConfigPath: wgConfigPath,
             },
             networkConfig: {
-                ipAddress: "192.168.1.100/24",
+                ipAddress: "192.168.1.16/24",
                 gateway: "192.168.1.1",
                 dns: ["8.8.8.8", "8.8.4.4"],
                 interfaces: [
@@ -76,9 +76,9 @@ async function generateConfigFile() {
                 {
                     name: "wlan0",
                     type: "wifi",
-                    ssid: "MyWiFiNetwork",
-                    password: "SecurePassword",
-                    method: "dhcp"
+                    ssid: "\"MyWiFiNetwork\"",
+                    password: "\"SecurePassword\"",
+                    method: "static"
                 },
                 {
                     name: "ppp0",
@@ -239,7 +239,7 @@ function generateNetplanConfig(config) {
             netplan.network.ethernets[iface.name] = {
                 dhcp4: iface.method === "dhcp",
                 addresses: iface.method === "static" ? [config.ipAddress] : undefined,
-                gateway4: iface.method === "static" ? config.gateway : undefined,
+                gateway: iface.method === "static" ? config.gateway : undefined,
                 nameservers: iface.method === "static" ? { addresses: config.dns } : undefined,
             };
         } else if (iface.type === "wifi") {
@@ -251,7 +251,7 @@ function generateNetplanConfig(config) {
                 },
                 dhcp4: iface.method === "dhcp",
                 addresses: iface.method === "static" ? [config.ipAddress] : undefined,
-                gateway4: iface.method === "static" ? config.gateway : undefined,
+                gateway: iface.method === "static" ? config.gateway : undefined,
                 nameservers: iface.method === "static" ? { addresses: config.dns } : undefined,
             };
         } else if (iface.type === "modem") {
