@@ -76,8 +76,8 @@ async function generateConfigFile() {
                 {
                     name: "wlan0",
                     type: "wifi",
-                    ssid: "\"MyWiFiNetwork\"",
-                    password: "\"SecurePassword\"",
+                    ssid: "MyWiFiNetwork",
+                    password: "SecurePassword",
                     method: "static"
                 },
                 {
@@ -241,11 +241,11 @@ function generateNetplanConfig(config) {
                 routes: iface.method === "static" ? [{ to: "0.0.0.0/0", via: config.gateway }] : undefined,
                 nameservers: iface.method === "static" ? { addresses: config.dns } : undefined,
             };
-        } else if (iface.type === "wifi") {
+       } else if (iface.type === "wifi") {
             netplan.network.wifis[iface.name] = {
                 dhcp4: iface.method === "dhcp",
                 optional: true,
-                access_points: {
+                "access-points": {
                     [iface.ssid]: {
                         password: iface.password,
                     },
