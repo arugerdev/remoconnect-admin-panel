@@ -76,8 +76,8 @@ async function generateConfigFile() {
                 {
                     name: "wlan0",
                     type: "wifi",
-                    ssid: "MyWiFiNetwork",
-                    password: "SecurePassword",
+                    ssid: "",
+                    password: "",
                     method: "static"
                 },
                 {
@@ -175,54 +175,6 @@ PersistentKeepalive = 25`;
         res.status(500).send('Error generando cliente VPN');
     }
 }
-
-// function sendLogs(res, filter = null, noFilter = null) {
-//     const stats = fs.statSync(logFilePath);
-
-//     // Leer el archivo de log completo al inicio
-//     const logData = fs.readFileSync(logFilePath, 'utf-8');
-//     const logEntries = logData.split('\n').filter(Boolean); // Divide en líneas y elimina vacías
-
-//     // Envía las entradas existentes al inicio
-//     logEntries.filter((i) => ((filter ? i.includes(filter) : true) && (noFilter ? !i.includes(noFilter) : true))).forEach((entry) => {
-//         if (!sentLogs.includes(entry)) {
-
-//             res.write(`data: ${entry}\n\n`);
-//             sentLogs.push(entry); // Añade la entrada a los logs enviados
-//         }
-//     });
-
-//     lastLogPosition = stats.size; // Actualiza la posición inicial
-// }
-
-// function getLogEntry(res, filter = null, noFilter = null) {
-//     const stats = fs.statSync(logFilePath);
-
-//     if (stats.size > lastLogPosition) {
-//         const logStream = fs.createReadStream(logFilePath, {
-//             start: lastLogPosition,
-//             end: stats.size,
-//         });
-
-//         let logData = '';
-
-//         logStream.on('data', (chunk) => {
-//             logData += chunk;
-//         });
-
-//         logStream.on('end', () => {
-//             const logEntries = logData.split('\n').filter(Boolean); // Divide en líneas y elimina vacías
-//             lastLogPosition = stats.size; // Actualiza la posición del último log leído
-//             logEntries.filter((i) => ((filter ? i.includes(filter) : true) && (noFilter ? !i.includes(noFilter) : true))).forEach((entry) => {
-//                 if (!sentLogs.includes(entry)) { // Solo envía si no se ha enviado antes
-
-//                     res.write(`data: ${entry}\n\n`);
-//                     sentLogs.push(entry); // Añade la entrada a los logs enviados
-//                 }
-//             });
-//         });
-//     }
-// }
 
 function generateNetplanConfig(config) {
     const netplan = {
@@ -480,6 +432,38 @@ app.post('/set-sim-pin', express.json(), (req, res) => {
     try {
         const config = JSON.parse(fs.readFileSync(configFilePath, 'utf-8'));
         config.simConfig.simPin = newPin;
+
+        // Guardar el nuevo nombre en el archivo de configuración
+        fs.writeFileSync(configFilePath, JSON.stringify(config, null, 2));
+        res.status(200).send('Pin actualizado correctamente');
+    } catch (error) {
+        console.error('Error actualizando Pin:', error);
+        res.status(500).send('Error actualizando Pin');
+    }
+});
+
+// Endpoint para obtener el pin de la sim desde el archivo de configuración
+app.get('/get-network', (req, res) => {
+    try {
+        const config = JSON.parse(fs.readFileSync(configFilePath, 'utf-8'));
+        res.status(200).json({ networkConfig: config.networkConfig });
+    } catch (error) {
+        console.error('Error obteniendo los ajustes de red:', error);
+        res.status(500).send('Error obteniendo los ajustes de red');
+    }
+});
+
+// Endpoint para actualizar la configuración de red del dispositivo en el archivo de configuración
+app.post('/set-network', express.json(), (req, res) => {
+
+    const { ipAddress, gateway, dns, interfaces } = req.body;
+    
+    try {
+        const config = JSON.parse(fs.readFileSync(configFilePath, 'utf-8'));
+        config.networkConfig.ipAddress = ipAddress;
+        config.networkConfig.gateway = gateway;
+        config.networkConfig.dns = dns;
+        config.networkConfig.interfaces = interfaces;
 
         // Guardar el nuevo nombre en el archivo de configuración
         fs.writeFileSync(configFilePath, JSON.stringify(config, null, 2));
