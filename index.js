@@ -104,9 +104,6 @@ async function generateVpnClient(req, res) {
         const publicKeyMatch = clientConf.match(/PublicKey\s*=\s*(.+)/);
         const presharedKeyMatch = clientConf.match(/PresharedKey\s*=\s*(.+)/);
 
-        const config = JSON.parse(fs.readFileSync(configFilePath, 'utf-8'));
-
-        // Actualizar la contraseña cifrada en la configuración
         config.vpnConfig.privateKey = privateKeyMatch;
         config.vpnConfig.publicKey = publicKeyMatch;
         config.vpnConfig.presharedKey = presharedKeyMatch;
