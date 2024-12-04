@@ -230,7 +230,6 @@ function generateNetplanConfig(config) {
             version: 2,
             ethernets: {},
             wifis: {},
-            modems: {},
         },
     };
 
@@ -239,30 +238,28 @@ function generateNetplanConfig(config) {
             netplan.network.ethernets[iface.name] = {
                 dhcp4: iface.method === "dhcp",
                 addresses: iface.method === "static" ? [config.ipAddress] : undefined,
-                gateway: iface.method === "static" ? config.gateway : undefined,
+                routes: iface.method === "static" ? [{ to: "0.0.0.0/0", via: config.gateway }] : undefined,
                 nameservers: iface.method === "static" ? { addresses: config.dns } : undefined,
             };
         } else if (iface.type === "wifi") {
             netplan.network.wifis[iface.name] = {
+                dhcp4: iface.method === "dhcp",
+                optional: true,
                 access_points: {
                     [iface.ssid]: {
                         password: iface.password,
                     },
                 },
-                dhcp4: iface.method === "dhcp",
                 addresses: iface.method === "static" ? [config.ipAddress] : undefined,
-                gateway: iface.method === "static" ? config.gateway : undefined,
+                routes: iface.method === "static" ? [{ to: "0.0.0.0/0", via: config.gateway }] : undefined,
                 nameservers: iface.method === "static" ? { addresses: config.dns } : undefined,
             };
-        } else if (iface.type === "modem") {
-            // Aquí podríamos manejar módems usando configuraciones manuales (fuera de Netplan)
-            // Por ejemplo, generar un archivo para wvdial o pppd
-            console.log(`Configurar manualmente el módem en: ${iface.name}`);
         }
     });
 
     return YAML.stringify(netplan);
 }
+
 
 function applyNetplanConfig(config) {
     const yamlConfig = generateNetplanConfig(config);
