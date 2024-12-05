@@ -76,8 +76,8 @@ async function generateConfigFile() {
                 {
                     name: "wlan0",
                     type: "wifi",
-                    ssid: "",
-                    password: "",
+                    ssid: "MiFibra-B0FF",
+                    password: "6of5fdJk",
                     method: "static"
                 },
                 {
