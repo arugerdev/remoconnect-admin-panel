@@ -131,22 +131,24 @@ async function generateVpnClient(req, res) {
         // Leer la configuración actual
         const config = JSON.parse(fs.readFileSync(configFilePath, 'utf-8'));
 
-        // Leer las claves y configuración del archivo /root/client.conf
-        const clientConf = fs.readFileSync(clientConfPath, 'utf-8');
+        // // Leer las claves y configuración del archivo /root/client.conf
+        // const clientConf = fs.readFileSync(clientConfPath, 'utf-8');
 
-        // Parsear las claves necesarias del archivo /root/client.conf
-        const privateKeyMatch = clientConf.match(/PrivateKey\s*=\s*(.+)/);
-        const publicKeyMatch = clientConf.match(/PublicKey\s*=\s*(.+)/);
-        const presharedKeyMatch = clientConf.match(/PresharedKey\s*=\s*(.+)/);
+        // // Parsear las claves necesarias del archivo /root/client.conf
+        // const privateKeyMatch = clientConf.match(/PrivateKey\s*=\s*(.+)/);
+        // const publicKeyMatch = clientConf.match(/PublicKey\s*=\s*(.+)/);
+        // const presharedKeyMatch = clientConf.match(/PresharedKey\s*=\s*(.+)/);
 
 
-        if (!privateKeyMatch || !publicKeyMatch || !presharedKeyMatch) {
-            throw new Error('No se encontraron las claves en /root/client.conf');
-        }
+        // if (!privateKeyMatch || !publicKeyMatch || !presharedKeyMatch) {
+        //     throw new Error('No se encontraron las claves en /root/client.conf');
+        // }
 
-        const privateKey = privateKeyMatch[1].trim();
-        const publicKey = publicKeyMatch[1].trim();
-        const presharedKey = presharedKeyMatch[1].trim();
+        // const privateKey = privateKeyMatch[1].trim();
+        // const publicKey = publicKeyMatch[1].trim();
+        // const presharedKey = presharedKeyMatch[1].trim();
+
+        const { privateKey, publicKey, presharedKey } = extractKeysFromWgConfig();
 
         // Cambiar la configuración de WireGuard del servidor (no cliente)
         const wgConfig = fs.readFileSync(wgConfigPath, 'utf-8');
