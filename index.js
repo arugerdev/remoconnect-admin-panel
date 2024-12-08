@@ -30,12 +30,20 @@ const clientConfPath = '/root/client.conf';
 
 // Función para leer los datos existentes de WireGuard del archivo wg0.conf
 function extractKeysFromWgConfig() {
-    const wgConfigContent = fs.readFileSync(clientConfPath, 'utf-8');
+    const clientConf = fs.readFileSync(clientConfPath, 'utf-8');
 
-    const privateKey = wgConfigContent.match(/PrivateKey = (.+)/)[1];
-    const publicKey = wgConfigContent.match(/PublicKey = (.+)/)[1];
-    const presharedKey = wgConfigContent.match(/PresharedKey = (.+)/)[1];
+    // Parsear las claves necesarias del archivo /root/client.conf
+    const privateKeyMatch = clientConf.match(/PrivateKey\s*=\s*(.+)/);
+    const publicKeyMatch = clientConf.match(/PublicKey\s*=\s*(.+)/);
+    const presharedKeyMatch = clientConf.match(/PresharedKey\s*=\s*(.+)/);
 
+    if (!privateKeyMatch || !publicKeyMatch || !presharedKeyMatch) {
+        throw new Error('No se encontraron las claves en /root/client.conf');
+    }
+
+    const privateKey = privateKeyMatch[1].trim();
+    const publicKey = publicKeyMatch[1].trim();
+    const presharedKey = presharedKeyMatch[1].trim();
     return { privateKey, publicKey, presharedKey };
 }
 
