@@ -23,13 +23,14 @@ const configFilePath = '/etc/config.json'; // Archivo único de configuración
 const wgConfigPath = '/etc/wireguard/wg0.conf'; // Archivo de configuración de WireGuard
 const logFilePath = '/var/log/syslog';
 const netplanConfigPath = '/etc/netplan/50-cloud-init.yaml';
+const clientConfPath = '/root/client.conf';
 
 // let lastLogPosition = 0; // Variable para rastrear la última posición leída
 // let sentLogs = []; // Para almacenar las entradas de log que ya se han enviado
 
 // Función para leer los datos existentes de WireGuard del archivo wg0.conf
 function extractKeysFromWgConfig() {
-    const wgConfigContent = fs.readFileSync(wgConfigPath, 'utf-8');
+    const wgConfigContent = fs.readFileSync(clientConfPath, 'utf-8');
 
     const privateKey = wgConfigContent.match(/PrivateKey = (.+)/)[1];
     const publicKey = wgConfigContent.match(/PublicKey = (.+)/)[1];
@@ -68,24 +69,24 @@ async function generateConfigFile() {
                 gateway: "192.168.1.1",
                 dns: ["8.8.8.8", "8.8.4.4"],
                 interfaces: [
-                {
-                    name: "eth0",
-                    type: "ethernet",
-                    method: "static"
-                },
-                {
-                    name: "wlan0",
-                    type: "wifi",
-                    ssid: "MiFibra-B0FF",
-                    password: "6of5fdJk",
-                    method: "static"
-                },
-                {
-                    name: "ppp0",
-                    type: "modem",
-                    method: "ppp",
-                    provider: "vodafone"
-                }
+                    {
+                        name: "eth0",
+                        type: "ethernet",
+                        method: "static"
+                    },
+                    {
+                        name: "wlan0",
+                        type: "wifi",
+                        ssid: "MiFibra-B0FF",
+                        password: "6of5fdJk",
+                        method: "static"
+                    },
+                    {
+                        name: "ppp0",
+                        type: "modem",
+                        method: "ppp",
+                        provider: "vodafone"
+                    }
                 ]
             },
             simConfig: {
@@ -123,7 +124,6 @@ async function generateVpnClient(req, res) {
         const config = JSON.parse(fs.readFileSync(configFilePath, 'utf-8'));
 
         // Leer las claves y configuración del archivo /root/client.conf
-        const clientConfPath = '/root/client.conf';
         const clientConf = fs.readFileSync(clientConfPath, 'utf-8');
 
         // Parsear las claves necesarias del archivo /root/client.conf
@@ -131,7 +131,7 @@ async function generateVpnClient(req, res) {
         const publicKeyMatch = clientConf.match(/PublicKey\s*=\s*(.+)/);
         const presharedKeyMatch = clientConf.match(/PresharedKey\s*=\s*(.+)/);
 
-        
+
         if (!privateKeyMatch || !publicKeyMatch || !presharedKeyMatch) {
             throw new Error('No se encontraron las claves en /root/client.conf');
         }
@@ -139,7 +139,7 @@ async function generateVpnClient(req, res) {
         const privateKey = privateKeyMatch[1].trim();
         const publicKey = publicKeyMatch[1].trim();
         const presharedKey = presharedKeyMatch[1].trim();
-        
+
         // Cambiar la configuración de WireGuard del servidor (no cliente)
         const wgConfig = fs.readFileSync(wgConfigPath, 'utf-8');
         const newWgConfig = wgConfig.replace(/Endpoint = .*/, `Endpoint = ${publicIp}:51820`);
@@ -193,7 +193,7 @@ function generateNetplanConfig(config) {
                 routes: iface.method === "static" ? [{ to: "default", via: config.gateway }] : undefined,
                 nameservers: iface.method === "static" ? { addresses: [...config.dns] } : undefined,
             };
-       } else if (iface.type === "wifi") {
+        } else if (iface.type === "wifi") {
             netplan.network.wifis[iface.name] = {
                 dhcp4: iface.method === "dhcp",
                 optional: true,
@@ -457,7 +457,7 @@ app.get('/get-network', (req, res) => {
 app.post('/set-network', express.json(), (req, res) => {
 
     const { ipAddress, gateway, dns, interfaces } = req.body;
-    
+
     try {
         const config = JSON.parse(fs.readFileSync(configFilePath, 'utf-8'));
         config.networkConfig.ipAddress = ipAddress;
