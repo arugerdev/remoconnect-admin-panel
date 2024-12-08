@@ -190,8 +190,8 @@ function generateNetplanConfig(config) {
             netplan.network.ethernets[iface.name] = {
                 dhcp4: iface.method === "dhcp",
                 addresses: iface.method === "static" ? [config.ipAddress] : undefined,
-                routes: iface.method === "static" ? [{ to: "0.0.0.0/0", via: config.gateway }] : undefined,
-                nameservers: iface.method === "static" ? { addresses: config.dns } : undefined,
+                routes: iface.method === "static" ? [{ to: "default", via: config.gateway }] : undefined,
+                nameservers: iface.method === "static" ? { addresses: [...config.dns] } : undefined,
             };
        } else if (iface.type === "wifi") {
             netplan.network.wifis[iface.name] = {
@@ -203,8 +203,8 @@ function generateNetplanConfig(config) {
                     },
                 },
                 addresses: iface.method === "static" ? [config.ipAddress] : undefined,
-                routes: iface.method === "static" ? [{ to: "0.0.0.0/0", via: config.gateway }] : undefined,
-                nameservers: iface.method === "static" ? { addresses: config.dns } : undefined,
+                routes: iface.method === "static" ? [{ to: "default", via: config.gateway }] : undefined,
+                nameservers: iface.method === "static" ? { addresses: [...config.dns] } : undefined,
             };
         }
     });
