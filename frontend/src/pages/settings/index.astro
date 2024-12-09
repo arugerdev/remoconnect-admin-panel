@@ -563,24 +563,20 @@ import Layout from "../../layouts/Layout.astro";
 					<form
 						action="javascript:void(0)"
 						class="flex flex-col gap-4 max-w-[1200px] w-full"
-						id="deviceNameForm"
+						id="deviceNetworkConfigForm"
 					>
 						<div class="flex flex-row gap-12 w-full">
 							<section class="flex flex-col gap-4 w-full">
-								<h3 class="text-xl font-semibold mb-4">
-									Ethernet
-								</h3>
-
 								<div
 									class="flex flex-row gap-4 w-full items-center justify-center"
 								>
-									<label for="eth_ipAddress" class="w-1/3"
+									<label for="ipAddress" class="w-1/3"
 										>Dirección Ip:</label
 									>
 									<input
 										type="text"
-										id="eth_ipAddress"
-										name="eth_ipAddress"
+										id="ipAddress"
+										name="ipAddress"
 										class="w-full px-3 py-2 border"
 										placeholder="Cargando..."
 										required
@@ -589,13 +585,13 @@ import Layout from "../../layouts/Layout.astro";
 								<div
 									class="flex flex-row gap-4 w-full items-center justify-center"
 								>
-									<label for="eth_gateway" class="w-1/3"
+									<label for="gateway" class="w-1/3"
 										>Puerta de enlace:</label
 									>
 									<input
 										type="text"
-										id="eth_gateway"
-										name="eth_gateway"
+										id="gateway"
+										name="gateway"
 										class="w-full px-3 py-2 border"
 										placeholder="Cargando..."
 										required
@@ -604,124 +600,160 @@ import Layout from "../../layouts/Layout.astro";
 								<div
 									class="flex flex-row gap-4 w-full items-center justify-center"
 								>
-									<label for="eth_gateway" class="w-1/3"
-										>DNS:</label
-									>
+									<label for="dns" class="w-1/3">DNS:</label>
 									<input
 										type="text"
-										id="eth_gateway"
-										name="eth_gateway"
+										id="dns"
+										name="dns"
 										class="w-full px-3 py-2 border"
 										placeholder="Cargando..."
 										required
 									/>
 								</div>
-								<div
-									class="flex flex-row gap-4 w-full items-center justify-center"
-								>
-									<label for="eth_gateway" class="w-1/3"
-										>Puerta de enlace:</label
-									>
-									<input
-										type="text"
-										id="eth_gateway"
-										name="eth_gateway"
-										class="w-full px-3 py-2 border"
-										placeholder="Cargando..."
-										required
-									/>
-								</div>
+								<section class="flex flex-row gap-12">
+									<section class="flex flex-col gap-4 w-full">
+										<h3 class="text-xl font-semibold mb-4">
+											Ethernet
+										</h3>
 
-								<p id="successMessage" class="success-message">
-									Nombre actualizado correctamente.
-								</p>
-								<p id="errorMessage" class="error-message">
-									Error actualizando el nombre.
-								</p>
-							</section>
-							<section class="flex flex-col gap-4 w-full">
-								<h3 class="text-xl font-semibold mb-4">Wifi</h3>
+										<div
+											class="flex flex-row gap-4 w-full items-center justify-center"
+										>
+											<label
+												for="eth_gateway"
+												class="w-1/3"
+												>Puerta de enlace:</label
+											>
+											<input
+												type="text"
+												id="eth_gateway"
+												name="eth_gateway"
+												class="w-full px-3 py-2 border"
+												placeholder="Cargando..."
+												required
+											/>
+										</div>
 
-								<div
-									class="flex flex-row gap-4 w-full items-center justify-center"
-								>
-									<label for="eth_ipAddress" class="w-1/3"
-										>Dirección Ip:</label
-									>
-									<input
-										type="text"
-										id="eth_ipAddress"
-										name="eth_ipAddress"
-										class="w-full px-3 py-2 border"
-										placeholder="Cargando..."
-										required
-									/>
-								</div>
-								<div
-									class="flex flex-row gap-4 w-full items-center justify-center"
-								>
-									<label for="eth_gateway" class="w-1/3"
-										>Puerta de enlace:</label
-									>
-									<input
-										type="text"
-										id="eth_gateway"
-										name="eth_gateway"
-										class="w-full px-3 py-2 border"
-										placeholder="Cargando..."
-										required
-									/>
-								</div>
+										<p
+											id="successMessage"
+											class="success-message"
+										>
+											Nombre actualizado correctamente.
+										</p>
+										<p
+											id="errorMessage"
+											class="error-message"
+										>
+											Error actualizando el nombre.
+										</p>
+									</section>
+									<section class="flex flex-col gap-4 w-full">
+										<h3 class="text-xl font-semibold mb-4">
+											Wifi
+										</h3>
 
-								<p id="successMessage" class="success-message">
-									Nombre actualizado correctamente.
-								</p>
-								<p id="errorMessage" class="error-message">
-									Error actualizando el nombre.
-								</p>
-							</section>
-							<section class="flex flex-col gap-4 w-full">
-								<h3 class="text-xl font-semibold mb-4">
-									Modem 4G/LTE
-								</h3>
+										<div
+											class="flex flex-row gap-4 w-full items-center justify-center"
+										>
+											<label
+												for="eth_ipAddress"
+												class="w-1/3"
+												>Dirección Ip:</label
+											>
+											<input
+												type="text"
+												id="eth_ipAddress"
+												name="eth_ipAddress"
+												class="w-full px-3 py-2 border"
+												placeholder="Cargando..."
+												required
+											/>
+										</div>
+										<div
+											class="flex flex-row gap-4 w-full items-center justify-center"
+										>
+											<label
+												for="eth_gateway"
+												class="w-1/3"
+												>Puerta de enlace:</label
+											>
+											<input
+												type="text"
+												id="eth_gateway"
+												name="eth_gateway"
+												class="w-full px-3 py-2 border"
+												placeholder="Cargando..."
+												required
+											/>
+										</div>
 
-								<div
-									class="flex flex-row gap-4 w-full items-center justify-center"
-								>
-									<label for="eth_ipAddress" class="w-1/3"
-										>Dirección Ip:</label
-									>
-									<input
-										type="text"
-										id="eth_ipAddress"
-										name="eth_ipAddress"
-										class="w-full px-3 py-2 border"
-										placeholder="Cargando..."
-										required
-									/>
-								</div>
-								<div
-									class="flex flex-row gap-4 w-full items-center justify-center"
-								>
-									<label for="eth_gateway" class="w-1/3"
-										>Puerta de enlace:</label
-									>
-									<input
-										type="text"
-										id="eth_gateway"
-										name="eth_gateway"
-										class="w-full px-3 py-2 border"
-										placeholder="Cargando..."
-										required
-									/>
-								</div>
+										<p
+											id="successMessage"
+											class="success-message"
+										>
+											Nombre actualizado correctamente.
+										</p>
+										<p
+											id="errorMessage"
+											class="error-message"
+										>
+											Error actualizando el nombre.
+										</p>
+									</section>
+									<section class="flex flex-col gap-4 w-full">
+										<h3 class="text-xl font-semibold mb-4">
+											Modem 4G/LTE
+										</h3>
 
-								<p id="successMessage" class="success-message">
-									Nombre actualizado correctamente.
-								</p>
-								<p id="errorMessage" class="error-message">
-									Error actualizando el nombre.
-								</p>
+										<div
+											class="flex flex-row gap-4 w-full items-center justify-center"
+										>
+											<label
+												for="eth_ipAddress"
+												class="w-1/3"
+												>Dirección Ip:</label
+											>
+											<input
+												type="text"
+												id="eth_ipAddress"
+												name="eth_ipAddress"
+												class="w-full px-3 py-2 border"
+												placeholder="Cargando..."
+												required
+											/>
+										</div>
+										<div
+											class="flex flex-row gap-4 w-full items-center justify-center"
+										>
+											<label
+												for="eth_gateway"
+												class="w-1/3"
+												>Puerta de enlace:</label
+											>
+											<input
+												type="text"
+												id="eth_gateway"
+												name="eth_gateway"
+												class="w-full px-3 py-2 border"
+												placeholder="Cargando..."
+												required
+											/>
+										</div>
+
+										<p
+											id="successMessage"
+											class="success-message"
+										>
+											Nombre actualizado correctamente.
+										</p>
+										<p
+											id="errorMessage"
+											class="error-message"
+										>
+											Error actualizando el nombre.
+										</p>
+									</section>
+								</section>
 							</section>
 						</div>
 						<button
@@ -733,14 +765,18 @@ import Layout from "../../layouts/Layout.astro";
 						// Cargar el nombre actual del dispositivo al cargar la página
 						async function loadNetworkConfig() {
 							try {
-								const response = await fetch(
-									"/api/get-device-name",
-								);
+								const response =
+									await fetch("/api/get-network");
 								if (response.ok) {
 									const data = await response.json();
 									document.getElementById(
-										"deviceNameInput",
-									).placeholder = data.deviceName;
+										"ipAddress",
+									).placeholder = data.ipAddress;
+									document.getElementById("dns").placeholder =
+										data.dns[0];
+									document.getElementById(
+										"gateway",
+									).placeholder = data.gateway;
 								} else {
 									console.error(
 										"Error obteniendo el nombre del dispositivo",
@@ -755,49 +791,51 @@ import Layout from "../../layouts/Layout.astro";
 						}
 
 						// Manejar la actualización del nombre del dispositivo
-						const form = document.getElementById("deviceNameForm");
-						form.addEventListener("submit", async (e) => {
-							e.preventDefault();
-							const deviceNameInput =
-								document.getElementById(
-									"deviceNameInput",
-								).value;
-							const successMessage =
-								document.getElementById("successMessage");
-							const errorMessage =
-								document.getElementById("errorMessage");
+						const formNetworkConfig = document.getElementById(
+							"deviceNetworkConfigForm",
+						);
+						// form.addEventListener("submit", async (e) => {
+						// 	e.preventDefault();
+						// 	const deviceNameInput =
+						// 		document.getElementById(
+						// 			"deviceNameInput",
+						// 		).value;
+						// 	const successMessage =
+						// 		document.getElementById("successMessage");
+						// 	const errorMessage =
+						// 		document.getElementById("errorMessage");
 
-							if (deviceNameInput.length <= 3) {
-								alert("El nombre debe de ser mas largo");
-								return;
-							}
-							try {
-								const response = await fetch(
-									"/api/set-device-name",
-									{
-										method: "POST",
-										headers: {
-											"Content-Type": "application/json",
-										},
-										body: JSON.stringify({
-											newName: deviceNameInput,
-										}),
-									},
-								);
+						// 	if (deviceNameInput.length <= 3) {
+						// 		alert("El nombre debe de ser mas largo");
+						// 		return;
+						// 	}
+						// 	try {
+						// 		const response = await fetch(
+						// 			"/api/set-device-name",
+						// 			{
+						// 				method: "POST",
+						// 				headers: {
+						// 					"Content-Type": "application/json",
+						// 				},
+						// 				body: JSON.stringify({
+						// 					newName: deviceNameInput,
+						// 				}),
+						// 			},
+						// 		);
 
-								if (response.ok) {
-									successMessage.style.display = "block";
-									errorMessage.style.display = "none";
-								} else {
-									throw new Error(
-										"Error al actualizar el nombre",
-									);
-								}
-							} catch (error) {
-								successMessage.style.display = "none";
-								errorMessage.style.display = "block";
-							}
-						});
+						// 		if (response.ok) {
+						// 			successMessage.style.display = "block";
+						// 			errorMessage.style.display = "none";
+						// 		} else {
+						// 			throw new Error(
+						// 				"Error al actualizar el nombre",
+						// 			);
+						// 		}
+						// 	} catch (error) {
+						// 		successMessage.style.display = "none";
+						// 		errorMessage.style.display = "block";
+						// 	}
+						// });
 					</script>
 				</section>
 			</section>
