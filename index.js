@@ -80,14 +80,14 @@ async function generateConfigFile() {
                     {
                         name: "eth0",
                         type: "ethernet",
-                        method: "static"
+                        method: "dhcp"
                     },
                     {
                         name: "wlan0",
                         type: "wifi",
                         ssid: "MiFibra-B0FF",
                         password: "6of5fdJk",
-                        method: "static"
+                        method: "dhcp"
                     },
                     {
                         name: "ppp0",
