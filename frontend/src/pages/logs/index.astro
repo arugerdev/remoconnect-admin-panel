@@ -42,7 +42,7 @@ import Layout from "../../layouts/Layout.astro";
         <script defer>
             const vpnLogsTextArea = document.getElementById("vpnlogs-textarea");
 
-            const vpnEventSource = new EventSource("/api/vpn-logs");
+            const vpnEventSource = new EventSource(":3030/vpn-logs");
 
             vpnEventSource.onmessage = function (event) {
                 vpnLogsTextArea.textContent += "\n" + event.data;
@@ -62,7 +62,7 @@ import Layout from "../../layouts/Layout.astro";
 
             const sysLogsTextArea = document.getElementById("syslogs-textarea");
 
-            const sysEventSource = new EventSource("/api/sys-logs");
+            const sysEventSource = new EventSource(":3030/sys-logs");
 
             sysEventSource.onmessage = function (event) {
                 sysLogsTextArea.textContent += "\n" + event.data;

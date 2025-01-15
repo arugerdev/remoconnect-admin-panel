@@ -25,7 +25,7 @@ const { title } = Astro.props;
 		import { requireAuth } from "../utils/auth";
 
 		async function checkFirstRun() {
-			const response = await fetch("/api/check-first-run");
+			const response = await fetch(":3030/check-first-run");
 			const data = await response.json();
 			if (data.firstRun) {
 				window.location.href = "/password"; // Redirige a la página de inicio de sesión

@@ -8,12 +8,12 @@ export default defineConfig({
   vite: {
     server: {
       proxy: {
-        '/api': {
-          target: 'http://localhost:3030', // Puerto de tu servidor Express
-          changeOrigin: true,
-          ws: true,
-          rewrite: (path) => path.replace(/^\/api/, ''),
-        },
+        // '/api': {
+        //   target: 'http://localhost:3030/', // Puerto de tu servidor Express
+        //   changeOrigin: true,
+        //   ws: true,
+        //   rewrite: (path) => path.replace(/^\:3030/, ''),
+        // },
       },
     },
   },
