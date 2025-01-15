@@ -48,7 +48,7 @@ import Layout from "../../layouts/Layout.astro";
 						async function loadDeviceName() {
 							try {
 								const response = await fetch(
-									":3030/get-device-name",
+									"/api/get-device-name",
 								);
 								if (response.ok) {
 									const data = await response.json();
@@ -87,7 +87,7 @@ import Layout from "../../layouts/Layout.astro";
 							}
 							try {
 								const response = await fetch(
-									":3030/set-device-name",
+									"/api/set-device-name",
 									{
 										method: "POST",
 										headers: {
@@ -299,7 +299,7 @@ import Layout from "../../layouts/Layout.astro";
 								document.getElementById("password").value;
 
 							// Realiza la solicitud POST al servidor para cambiar la contraseña
-							const response = await fetch(":3030/set-password", {
+							const response = await fetch("/api/set-password", {
 								method: "POST",
 								headers: {
 									"Content-Type": "application/json",
@@ -412,7 +412,7 @@ import Layout from "../../layouts/Layout.astro";
 								document.getElementById("updateMessage");
 
 							// Realiza la solicitud POST al servidor para reiniciar el equipo
-							const response = await fetch(":3030/update", {
+							const response = await fetch("/api/update", {
 								method: "POST",
 								headers: {
 									"Content-Type": "application/json",
@@ -532,7 +532,7 @@ import Layout from "../../layouts/Layout.astro";
 								document.getElementById("rebootMessage");
 
 							// Realiza la solicitud POST al servidor para reiniciar el equipo
-							const response = await fetch(":3030/reboot", {
+							const response = await fetch("/api/reboot", {
 								method: "POST",
 								headers: {
 									"Content-Type": "application/json",
@@ -766,7 +766,7 @@ import Layout from "../../layouts/Layout.astro";
 						async function loadNetworkConfig() {
 							try {
 								const response =
-									await fetch(":3030/get-network");
+									await fetch("/api/get-network");
 								if (response.ok) {
 									const data = await response.json();
 									document.getElementById(
@@ -811,7 +811,7 @@ import Layout from "../../layouts/Layout.astro";
 						// 	}
 						// 	try {
 						// 		const response = await fetch(
-						// 			":3030/set-device-name",
+						// 			"/api/set-device-name",
 						// 			{
 						// 				method: "POST",
 						// 				headers: {

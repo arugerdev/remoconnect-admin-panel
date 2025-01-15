@@ -54,7 +54,7 @@ import Layout from "../layouts/Layout.astro";
 			<script defer>
 				async function getSimPin() {
 					try {
-						const response = await fetch(":3030/get-sim-pin");
+						const response = await fetch("/api/get-sim-pin");
 						const status = await response.json();
 						const simPinInput =
 							document.getElementById("simPinInput");
@@ -69,7 +69,7 @@ import Layout from "../layouts/Layout.astro";
 
 				async function getSimStatus() {
 					try {
-						const response = await fetch(":3030/sim-status");
+						const response = await fetch("/api/sim-status");
 						const status = await response.json();
 
 						const statusIndicator = document.getElementById(
@@ -136,7 +136,7 @@ import Layout from "../layouts/Layout.astro";
 			<script defer>
 				async function getVpnStatus() {
 					try {
-						const response = await fetch(":3030/vpn-status");
+						const response = await fetch("/api/vpn-status");
 						const status = await response.json();
 
 						const statusIndicator = document.getElementById(
@@ -194,7 +194,7 @@ import Layout from "../layouts/Layout.astro";
 			<script defer>
 				async function loadDeviceName() {
 					try {
-						const response = await fetch(":3030/get-device-name");
+						const response = await fetch("/api/get-device-name");
 						if (response.ok) {
 							const data = await response.json();
 							return data.deviceName;
@@ -222,7 +222,7 @@ import Layout from "../layouts/Layout.astro";
 					try {
 						// Realizar la petición para generar el archivo del cliente VPN
 						const response = await fetch(
-							":3030/download-vpn-client",
+							"/api/download-vpn-client",
 						);
 
 						if (response.ok) {

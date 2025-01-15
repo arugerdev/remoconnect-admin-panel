@@ -115,7 +115,7 @@
 
                 const passwordInput = document.getElementById("password").value;
 
-                const response = await fetch(":3030/verify-password", {
+                const response = await fetch("/api/verify-password", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",

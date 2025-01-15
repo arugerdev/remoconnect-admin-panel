@@ -60,7 +60,7 @@ import Layout from "../../layouts/Layout.astro";
 
 			<script defer>
 				async function getSystemStatus() {
-					const response = await fetch(":3030/system-status");
+					const response = await fetch("/api/system-status");
 					const data = await response.json();
 					const memUsage = (
 						(data.usedMem.replace(" MB", "") /

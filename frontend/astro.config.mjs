@@ -9,10 +9,10 @@ export default defineConfig({
     server: {
       proxy: {
         // '/api': {
-        //   target: 'http://localhost:3030/', // Puerto de tu servidor Express
+        //   target: 'http://localhost/api/', // Puerto de tu servidor Express
         //   changeOrigin: true,
         //   ws: true,
-        //   rewrite: (path) => path.replace(/^\:3030/, ''),
+        //   rewrite: (path) => path.replace(/^\/api/, ''),
         // },
       },
     },
