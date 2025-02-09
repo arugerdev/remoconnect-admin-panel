@@ -713,6 +713,7 @@ app.listen(PORT, () => {
     }
     else {
         const config = JSON.parse(fs.readFileSync(configFilePath, 'utf-8')).networkConfig;
+        console.log(config);
         if (config.vpnConfig.privateKey === '' || config.vpnConfig.publicKey === '' || config.vpnConfig.presharedKey === '') {
             const { privateKey, publicKey, presharedKey } = extractKeysFromWgConfig();
             config.vpnConfig.privateKey = privateKey;
