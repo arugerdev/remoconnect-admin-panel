@@ -99,6 +99,23 @@ async function generateConfigFile() {
             },
             simConfig: {
                 pin: '0000'
+            },
+            services: {
+                virtualHere: {
+                    enabled: true,
+                    port: 7575,
+                    config: null
+                },
+                wireGuard: {
+                    enabled: true,
+                    config: null
+                },
+                sumi: {
+                    enabled: true,
+                    config: {
+
+                    }
+                }
             }
         };
 
