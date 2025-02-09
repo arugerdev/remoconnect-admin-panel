@@ -711,6 +711,17 @@ app.listen(PORT, () => {
     if (!fs.existsSync(configFilePath)) {
         generateConfigFile();
     }
+    else {
+        const config = JSON.parse(fs.readFileSync(configFilePath, 'utf-8')).networkConfig;
+        if (config.vpnConfig.privateKey === '' || config.vpnConfig.publicKey === '' || config.vpnConfig.presharedKey === '') {
+            const { privateKey, publicKey, presharedKey } = extractKeysFromWgConfig();
+            config.vpnConfig.privateKey = privateKey;
+            config.vpnConfig.publicKey = publicKey;
+            config.vpnConfig.presharedKey = presharedKey;
+            fs.writeFileSync(configFilePath, JSON.stringify({ networkConfig: config }, null, 2));
+            restartWireguard();
+        }
+    }
 
     try {
         const config = JSON.parse(fs.readFileSync(configFilePath, 'utf-8')).networkConfig;
