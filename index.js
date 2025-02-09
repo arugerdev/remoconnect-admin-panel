@@ -718,7 +718,7 @@ app.listen(PORT, () => {
             config.vpnConfig.privateKey = privateKey;
             config.vpnConfig.publicKey = publicKey;
             config.vpnConfig.presharedKey = presharedKey;
-            fs.writeFileSync(configFilePath, JSON.stringify({ networkConfig: config }, null, 2));
+            fs.writeFileSync(configFilePath, JSON.stringify(config, null, 2));
             restartWireguard();
         }
     }
