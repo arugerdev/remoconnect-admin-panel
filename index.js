@@ -544,7 +544,7 @@ app.get('/check-first-run', (req, res) => {
 });
 
 app.post('/update', (req, res) => {
-    exec('sudo sh /home/maes2/update-code.sh', (error) => {
+    exec('sudo sh /home/rud1/update-code.sh', (error) => {
         if (error) {
             console.error(`Error al actualizar: ${error.message}`);
             return res.json({ success: false, message: 'Error al actualizar el dispositivo.' });
