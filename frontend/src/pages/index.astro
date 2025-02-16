@@ -4,299 +4,272 @@ import Layout from "../layouts/Layout.astro";
 ---
 
 <Layout title="Panel de administración">
-	<Navbar />
-	<script
-		src="https://cdn.jsdelivr.net/npm/flowbite@1.5.0/dist/flowbite.bundle.min.js"
-	></script>
+  <Navbar />
+  <script
+    src="https://cdn.jsdelivr.net/npm/flowbite@1.5.0/dist/flowbite.bundle.min.js"
+  ></script>
 
-	<main class="p-8 max-w-screen-xl">
-		<h1 class="text-4xl font-extrabold mb-6 text-gray-800">General</h1>
-		<p class="text-lg text-gray-600">Estado general del sistema y la red</p>
+  <main class="p-8 max-w-screen-xl">
+    <h1 class="text-4xl font-extrabold mb-6 text-gray-800">General</h1>
+    <p class="text-lg text-gray-600">Estado general del sistema y la red</p>
 
-		<section class="pb-12 pt-4">
-			<h2 class="text-xl font-semibold mb-4">Administración de la SIM</h2>
+    <section class="pb-12 pt-4">
+      <h2 class="text-xl font-semibold mb-4">Administración de la SIM</h2>
 
-			<div class="mt-6">
-				<h2 class="text-lg font-semibold">Estado de la SIM</h2>
-				<div id="sim-status" class="flex items-center">
-					<div
-						id="sim-status-indicator"
-						class="w-3 h-3 rounded-full mr-2 bg-gray-400"
-					>
-					</div>
-					<p id="sim-status-text">Cargando...</p>
-				</div>
-			</div>
-			<div class="mt-6 pb-4">
-				<label class="text-md font-semibold"
-					>Activación PIN de SIM</label
-				>
-				<form
-					action="javascript:void(0)"
-					class="flex flex-col gap-4 max-w-[330px]"
-					id="simPinForm"
-				>
-					<input
-						type="text"
-						id="simPinInput"
-						name="simPin"
-						class="w-full px-3 py-2 border"
-						placeholder="Cargando..."
-						required
-					/>
-					<button
-						class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 max-w-fit"
-						type="submit">Activar SIM con PIN</button
-					>
-				</form>
-			</div>
+      <div class="mt-6">
+        <h2 class="text-lg font-semibold">Estado de la SIM</h2>
+        <div id="sim-status" class="flex items-center">
+          <div
+            id="sim-status-indicator"
+            class="w-3 h-3 rounded-full mr-2 bg-gray-400"
+          >
+          </div>
+          <p id="sim-status-text">Cargando...</p>
+        </div>
+      </div>
+      <div class="mt-6 pb-4">
+        <label class="text-md font-semibold">Activación PIN de SIM</label>
+        <form
+          action="javascript:void(0)"
+          class="flex flex-col gap-4 max-w-[330px]"
+          id="simPinForm"
+        >
+          <input
+            type="text"
+            id="simPinInput"
+            name="simPin"
+            class="w-full px-3 py-2 border"
+            placeholder="Cargando..."
+            required
+          />
+          <button
+            class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 max-w-fit"
+            type="submit">Activar SIM con PIN</button
+          >
+        </form>
+      </div>
 
-			<script defer>
-				async function getSimPin() {
-					try {
-						const response = await fetch("/api/get-sim-pin");
-						const status = await response.json();
-						const simPinInput =
-							document.getElementById("simPinInput");
-						simPinInput.placeholder = status.simPin.toString();
-					} catch (error) {
-						console.error(
-							"Error al obtener el estado de la SIM:",
-							error,
-						);
-					}
-				}
+      <script defer>
+        async function getSimPin() {
+          try {
+            const response = await fetch("/api/get-sim-pin");
+            const status = await response.json();
+            const simPinInput = document.getElementById("simPinInput");
+            simPinInput.placeholder = status.simPin.toString();
+          } catch (error) {
+            console.error("Error al obtener el estado de la SIM:", error);
+          }
+        }
 
-				async function getSimStatus() {
-					try {
-						const response = await fetch("/api/sim-status");
-						const status = await response.json();
+        async function getSimStatus() {
+          try {
+            const response = await fetch("/api/sim-status");
+            const status = await response.json();
 
-						const statusIndicator = document.getElementById(
-							"sim-status-indicator",
-						);
-						const statusText =
-							document.getElementById("sim-status-text");
+            const statusIndicator = document.getElementById(
+              "sim-status-indicator"
+            );
+            const statusText = document.getElementById("sim-status-text");
 
-						if (status.active) {
-							statusIndicator.classList.remove("bg-gray-400");
-							statusIndicator.classList.add("bg-green-500");
-							statusText.textContent = "SIM Activa";
-						} else if (status.error) {
-							statusIndicator.classList.remove("bg-gray-400");
-							statusIndicator.classList.add("bg-red-500");
-							statusText.textContent = "Error en la SIM";
-						} else {
-							statusIndicator.classList.remove("bg-gray-400");
-							statusIndicator.classList.add("bg-yellow-500");
-							statusText.textContent = "Iniciando...";
-						}
-					} catch (error) {
-						console.error(
-							"Error al obtener el estado de la SIM:",
-							error,
-						);
-					}
-				}
-			</script>
-		</section>
+            if (status.active) {
+              statusIndicator.classList.remove("bg-gray-400");
+              statusIndicator.classList.add("bg-green-500");
+            } else if (status.error) {
+              statusIndicator.classList.remove("bg-gray-400");
+              statusIndicator.classList.add("bg-red-500");
+            } else {
+              statusIndicator.classList.remove("bg-gray-400");
+              statusIndicator.classList.add("bg-yellow-500");
+            }
 
-		<section class="pb-12 pt-4">
-			<h2 class="text-xl font-semibold mb-4">Administración de VPN</h2>
+            statusText.textContent = status.message;
+          } catch (error) {
+            console.error("Error al obtener el estado de la SIM:", error);
+          }
+        }
+      </script>
+    </section>
 
-			<div class="mt-6 pb-4">
-				<label class="text-md font-semibold">Estado de la VPN</label>
-				<div id="vpn-status" class="flex flex items-center">
-					<div
-						id="vpn-status-indicator"
-						class="w-3 h-3 rounded-full mr-2 bg-gray-400"
-					>
-					</div>
-					<p id="vpn-status-text">Cargando...</p>
-				</div>
-				<p id="vpn-status-interface" class="hidden">
-					<b></b> Cargando...
-				</p>
-				<p id="vpn-status-allowed-ips" class="hidden">
-					<b></b> Cargando...
-				</p>
-				<p id="vpn-status-port" class="hidden"><b></b> Cargando...</p>
-			</div>
-			<div class="mt-6 pb-4">
-				<label class="text-md font-semibold"
-					>Información de la VPN</label
-				>
+    <section class="pb-12 pt-4">
+      <h2 class="text-xl font-semibold mb-4">Administración de VPN</h2>
 
-				<p id="vpn-info-net"><b>Red de la VPN:</b> 10.7.0.0/24</p>
-				<p id="vpn-info-raspip">
-					<b>IP de dispositivo en VPN:</b> 10.7.0.1/24
-				</p>
-			</div>
+      <div class="mt-6 pb-4">
+        <label class="text-md font-semibold">Estado de la VPN</label>
+        <div id="vpn-status" class="flex flex items-center">
+          <div
+            id="vpn-status-indicator"
+            class="w-3 h-3 rounded-full mr-2 bg-gray-400"
+          >
+          </div>
+          <p id="vpn-status-text">Cargando...</p>
+        </div>
+        <p id="vpn-status-interface" class="hidden">
+          <b></b> Cargando...
+        </p>
+        <p id="vpn-status-allowed-ips" class="hidden">
+          <b></b> Cargando...
+        </p>
+        <p id="vpn-status-port" class="hidden"><b></b> Cargando...</p>
+      </div>
+      <div class="mt-6 pb-4">
+        <label class="text-md font-semibold">Información de la VPN</label>
 
-			<script defer>
-				async function getVpnStatus() {
-					try {
-						const response = await fetch("/api/vpn-status");
-						const status = await response.json();
+        <p id="vpn-info-net"><b>Red de la VPN:</b> 10.7.0.0/24</p>
+        <p id="vpn-info-raspip">
+          <b>IP de dispositivo en VPN:</b> 10.7.0.1/24
+        </p>
+      </div>
 
-						const statusIndicator = document.getElementById(
-							"vpn-status-indicator",
-						);
-						const statusText =
-							document.getElementById("vpn-status-text");
-						const interfacesText = document.getElementById(
-							"vpn-status-interface",
-						);
-						const allowedIpsText = document.getElementById(
-							"vpn-status-allowed-ips",
-						);
-						const portText =
-							document.getElementById("vpn-status-port");
+      <script defer>
+        async function getVpnStatus() {
+          try {
+            const response = await fetch("/api/vpn-status");
+            const status = await response.json();
 
-						if (status.active) {
-							interfacesText.classList.remove("hidden");
-							portText.classList.remove("hidden");
-							allowedIpsText.classList.remove("hidden");
+            const statusIndicator = document.getElementById(
+              "vpn-status-indicator"
+            );
+            const statusText = document.getElementById("vpn-status-text");
+            const interfacesText = document.getElementById(
+              "vpn-status-interface"
+            );
+            const allowedIpsText = document.getElementById(
+              "vpn-status-allowed-ips"
+            );
+            const portText = document.getElementById("vpn-status-port");
 
-							statusIndicator.classList.remove("bg-gray-400");
-							statusIndicator.classList.add("bg-green-500");
-							statusText.textContent = "VPN Activa";
-						} else if (status.error) {
-							statusIndicator.classList.remove("bg-gray-400");
-							statusIndicator.classList.add("bg-red-500");
-							statusText.textContent = "Error en la VPN";
-						} else {
-							statusIndicator.classList.remove("bg-gray-400");
-							statusIndicator.classList.add("bg-yellow-500");
-							statusText.textContent = "Iniciando VPN...";
-						}
-						interfacesText.innerHTML = `<b>Interfaz: </b> ${status.interface}`;
-						portText.innerHTML = `<b>Puerto de escucha: </b> ${status.port}`;
-						allowedIpsText.innerHTML = `<b>IPs disponibles: </b> ${status.allowedIPs}`;
-					} catch (error) {
-						console.error(
-							"Error al obtener el estado de la VPN:",
-							error,
-						);
-					}
-				}
-			</script>
+            if (status.active) {
+              interfacesText.classList.remove("hidden");
+              portText.classList.remove("hidden");
+              allowedIpsText.classList.remove("hidden");
 
-			<button
-				class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600"
-				id="generateVpnBtn">Generar archivo de cliente VPN</button
-			>
-			<div class="loader" id="loader"></div>
-			<p id="successMessage" class="success-message">
-				Archivo VPN generado correctamente.
-			</p>
+              statusIndicator.classList.remove("bg-gray-400");
+              statusIndicator.classList.add("bg-green-500");
+              statusText.textContent = "VPN Activa";
+            } else if (status.error) {
+              statusIndicator.classList.remove("bg-gray-400");
+              statusIndicator.classList.add("bg-red-500");
+              statusText.textContent = "Error en la VPN";
+            } else {
+              statusIndicator.classList.remove("bg-gray-400");
+              statusIndicator.classList.add("bg-yellow-500");
+              statusText.textContent = "Iniciando VPN...";
+            }
+            interfacesText.innerHTML = `<b>Interfaz: </b> ${status.interface}`;
+            portText.innerHTML = `<b>Puerto de escucha: </b> ${status.port}`;
+            allowedIpsText.innerHTML = `<b>IPs disponibles: </b> ${status.allowedIPs}`;
+          } catch (error) {
+            console.error("Error al obtener el estado de la VPN:", error);
+          }
+        }
+      </script>
 
-			<script defer>
-				async function loadDeviceName() {
-					try {
-						const response = await fetch("/api/get-device-name");
-						if (response.ok) {
-							const data = await response.json();
-							return data.deviceName;
-						} else {
-							console.error(
-								"Error obteniendo el nombre del dispositivo",
-							);
-						}
-					} catch (error) {
-						console.error(
-							"Error conectando con el servidor:",
-							error,
-						);
-					}
-				}
+      <button
+        class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600"
+        id="generateVpnBtn">Generar archivo de cliente VPN</button
+      >
+      <div class="loader" id="loader"></div>
+      <p id="successMessage" class="success-message">
+        Archivo VPN generado correctamente.
+      </p>
 
-				async function generateVPN() {
-					const loader = document.getElementById("loader");
-					const successMessage =
-						document.getElementById("successMessage");
+      <script defer>
+        async function loadDeviceName() {
+          try {
+            const response = await fetch("/api/get-device-name");
+            if (response.ok) {
+              const data = await response.json();
+              return data.deviceName;
+            } else {
+              console.error("Error obteniendo el nombre del dispositivo");
+            }
+          } catch (error) {
+            console.error("Error conectando con el servidor:", error);
+          }
+        }
 
-					loader.style.display = "inline-block"; // Mostrar loader
-					successMessage.style.display = "none"; // Ocultar mensaje de éxito
+        async function generateVPN() {
+          const loader = document.getElementById("loader");
+          const successMessage = document.getElementById("successMessage");
 
-					try {
-						// Realizar la petición para generar el archivo del cliente VPN
-						const response = await fetch(
-							"/api/download-vpn-client",
-						);
+          loader.style.display = "inline-block"; // Mostrar loader
+          successMessage.style.display = "none"; // Ocultar mensaje de éxito
 
-						if (response.ok) {
-							const blob = await response.blob();
-							const url = window.URL.createObjectURL(blob);
-							const a = document.createElement("a");
-							a.href = url;
-							const deviceName = await loadDeviceName();
-							a.download = `${deviceName}.conf`;
-							document.body.appendChild(a);
-							a.click();
-							a.remove();
+          try {
+            // Realizar la petición para generar el archivo del cliente VPN
+            const response = await fetch("/api/download-vpn-client");
 
-							// Mostrar mensaje de éxito
-							successMessage.style.display = "block";
-						} else {
-							alert("Error generando el archivo VPN");
-						}
-					} catch (error) {
-						console.error(error);
-						alert("Error en la conexión con el servidor");
-					} finally {
-						loader.style.display = "none"; // Ocultar loader después de completar
-					}
-				}
-			</script>
-		</section>
-		<style>
-			/* Loader y mensaje de éxito */
-			.loader {
-				border: 4px solid #f3f3f3;
-				border-top: 4px solid #3498db;
-				border-radius: 50%;
-				width: 30px;
-				height: 30px;
-				animation: spin 2s linear infinite;
-				display: none;
-			}
+            if (response.ok) {
+              const blob = await response.blob();
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              const deviceName = await loadDeviceName();
+              a.download = `${deviceName}.conf`;
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
 
-			@keyframes spin {
-				0% {
-					transform: rotate(0deg);
-				}
-				100% {
-					transform: rotate(360deg);
-				}
-			}
+              // Mostrar mensaje de éxito
+              successMessage.style.display = "block";
+            } else {
+              alert("Error generando el archivo VPN");
+            }
+          } catch (error) {
+            console.error(error);
+            alert("Error en la conexión con el servidor");
+          } finally {
+            loader.style.display = "none"; // Ocultar loader después de completar
+          }
+        }
+      </script>
+    </section>
+    <style>
+      /* Loader y mensaje de éxito */
+      .loader {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #3498db;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        animation: spin 2s linear infinite;
+        display: none;
+      }
 
-			.success-message {
-				display: none;
-				color: green;
-				margin-top: 10px;
-			}
-			.error-message {
-				display: none;
-				color: red;
-				margin-top: 10px;
-			}
-		</style>
-		<script defer>
-			window.onload = () => {
-				getSimPin();
-				getVpnStatus();
-				getSimStatus();
-				setInterval(() => {
-					getVpnStatus();
-					getSimStatus();
-				}, 1000);
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
 
-				const generateVpnBtn =
-					document.getElementById("generateVpnBtn");
+      .success-message {
+        display: none;
+        color: green;
+        margin-top: 10px;
+      }
+      .error-message {
+        display: none;
+        color: red;
+        margin-top: 10px;
+      }
+    </style>
+    <script defer>
+      window.onload = () => {
+        getSimPin();
+        getVpnStatus();
+        getSimStatus();
+        setInterval(() => {
+          getVpnStatus();
+          getSimStatus();
+        }, 1000);
 
-				generateVpnBtn.addEventListener("click", generateVPN);
-			};
-		</script>
-	</main>
+        const generateVpnBtn = document.getElementById("generateVpnBtn");
+
+        generateVpnBtn.addEventListener("click", generateVPN);
+      };
+    </script>
+  </main>
 </Layout>
