@@ -225,7 +225,7 @@ function generateNetplanConfig(config) {
                 dhcp4: iface.method === "dhcp",
                 optional: true,
                 "access-points": {
-                    [iface.ssid]: {
+                    [((iface.ssid != null && iface.ssid != '') ? iface.ssid : 'NOSSID')]: {
                         password: iface.password,
                     },
                 },
@@ -726,7 +726,6 @@ app.listen(PORT, () => {
 
     try {
         const config = JSON.parse(fs.readFileSync(configFilePath, 'utf-8')).networkConfig;
-
         applyNetplanConfig(config);
         console.error('Netplan Configurado');
 
