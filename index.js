@@ -401,7 +401,7 @@ app.get('/sys-logs', (req, res) => {
 });
 
 // Endpoint para iniciar/detener VirtualHere
-app.post('/virtualhere/:action', (req, res) => {
+app.get('/virtualhere/:action', (req, res) => {
     const action = req.params['action'];
 
     if (action === 'start') {
@@ -450,7 +450,7 @@ app.get('/get-sim-pin', (req, res) => {
 });
 
 // Endpoint para actualizar el nombre del dispositivo en el archivo de configuración
-app.post('/set-sim-pin', express.json(), (req, res) => {
+app.get('/set-sim-pin', express.json(), (req, res) => {
     const { newPin } = req.body;
     if (!newPin || typeof newPin !== 'string') {
         return res.status(400).send('Pin invalido');
@@ -481,7 +481,7 @@ app.get('/get-network', (req, res) => {
 });
 
 // Endpoint para actualizar la configuración de red del dispositivo en el archivo de configuración
-app.post('/set-network', express.json(), (req, res) => {
+app.get('/set-network', express.json(), (req, res) => {
 
     const { ipAddress, gateway, dns, interfaces } = req.body;
 
@@ -502,7 +502,7 @@ app.post('/set-network', express.json(), (req, res) => {
 });
 
 // Endpoint para actualizar el nombre del dispositivo en el archivo de configuración
-app.post('/set-device-name', express.json(), (req, res) => {
+app.get('/set-device-name', express.json(), (req, res) => {
     const { newName } = req.body;
     if (!newName || typeof newName !== 'string') {
         return res.status(400).send('Nombre de dispositivo inválido');
@@ -522,7 +522,7 @@ app.post('/set-device-name', express.json(), (req, res) => {
 });
 
 // Ruta para reiniciar WireGuard después de la configuración
-app.post('/restart-wireguard', (req, res) => {
+app.get('/restart-wireguard', (req, res) => {
     restartWireguard()
 });
 
@@ -543,7 +543,7 @@ app.get('/check-first-run', (req, res) => {
     }
 });
 
-app.post('/update', (req, res) => {
+app.get('/update', (req, res) => {
     exec('sudo sh /home/rud1/update-code.sh', (error) => {
         if (error) {
             console.error(`Error al actualizar: ${error.message}`);
@@ -552,7 +552,7 @@ app.post('/update', (req, res) => {
         res.json({ success: true, message: 'Actualización iniciada.' });
     });
 });
-app.post('/reboot', (req, res) => {
+app.get('/reboot', (req, res) => {
     exec('sudo reboot', (error) => {
         if (error) {
             console.error(`Error al reiniciar: ${error.message}`);
@@ -651,7 +651,7 @@ app.get('/vpn-status', (req, res) => {
 });
 
 // Endpoint para guardar la contraseña en el archivo de configuración
-app.post('/set-password', async (req, res) => {
+app.get('/set-password', async (req, res) => {
     const { password } = req.body;
 
     if (!password) {
@@ -680,7 +680,7 @@ app.post('/set-password', async (req, res) => {
 });
 
 // Endpoint para verificar la contraseña desde el archivo de configuración
-app.post('/verify-password', async (req, res) => {
+app.get('/verify-password', async (req, res) => {
     const { password } = req.body;
 
     try {
