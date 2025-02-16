@@ -573,7 +573,7 @@ app.get('/sim-status', (req, res) => {
         // Parseamos la salida para encontrar el estado de la SIM
         const isActive = stdout.includes('state: connected'); // El módem está conectado
         const isError = stdout.includes('state: failed') || stderr; // Algún error en el módem
-        const isMissingSim = stdout.includes('failed reason: sim-missing');
+        const isMissingSim = stdout.includes('sim-missing');
         if (isError) {
             return res.json({ active: false, error: true, message: `Error en la SIM o módem ${isMissingSim ?? ': Falta tarjeta SIM...', ''}` });
         }
@@ -581,7 +581,7 @@ app.get('/sim-status', (req, res) => {
         // Respondemos con el estado de la SIM
         return res.json({
             active: isActive,
-            error: !isActive,
+            error: isError,
             isMissingSim: isMissingSim,
             message: !isMissingSim ? 'SIM Activa y conectada' : 'SIM no conectada o iniciando',
         });
