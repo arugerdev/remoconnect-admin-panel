@@ -20,104 +20,17 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors()); // Para permitir peticiones desde el frontend
 
 const configFilePath = '/etc/config.json'; // Archivo único de configuración
-const wgConfigPath = '/etc/wireguard/wg0.conf'; // Archivo de configuración de WireGuard
 const logFilePath = '/var/log/syslog';
 const netplanConfigPath = '/etc/netplan/50-cloud-init.yaml';
-const clientConfPath = '/root/client.conf';
 
 // let lastLogPosition = 0; // Variable para rastrear la última posición leída
 // let sentLogs = []; // Para almacenar las entradas de log que ya se han enviado
 
-// Función para leer los datos existentes de WireGuard del archivo wg0.conf
-function extractKeysFromWgConfig() {
-    const clientConf = fs.readFileSync(clientConfPath, 'utf-8');
-
-    // Parsear las claves necesarias del archivo /root/client.conf
-    const privateKeyMatch = clientConf.match(/PrivateKey\s*=\s*(.+)/);
-    const publicKeyMatch = clientConf.match(/PublicKey\s*=\s*(.+)/);
-    const presharedKeyMatch = clientConf.match(/PresharedKey\s*=\s*(.+)/);
-
-    if (!privateKeyMatch || !publicKeyMatch || !presharedKeyMatch) {
-        throw new Error('No se encontraron las claves en /root/client.conf');
-    }
-
-    const privateKey = privateKeyMatch[1].trim();
-    const publicKey = publicKeyMatch[1].trim();
-    const presharedKey = presharedKeyMatch[1].trim();
-    return { privateKey, publicKey, presharedKey };
-}
 
 async function generateConfigFile() {
     try {
-        // Generar claves públicas y privadas
-        const { privateKey, publicKey, presharedKey } = extractKeysFromWgConfig();
-
-        const response = await fetch('https://api.ipify.org?format=json');
-        const { ip: publicIp } = await response.json();
-
-        // Plantilla de configuración
-        const configTemplate = {
-            deviceName: "RaspberryPi-001",
-            vpnConfig: {
-                privateKey: privateKey,
-                publicKey: publicKey,
-                presharedKey: presharedKey,
-                endpoint: `${publicIp}:51820`,
-                allowedIPs: "0.0.0.0/0, ::/0",
-                dns: "1.1.1.1",
-                persistentKeepalive: 25
-            },
-            systemConfig: {
-                firstRun: true,
-                passwordHash: "",
-                wireGuardConfigPath: wgConfigPath,
-            },
-            networkConfig: {
-                ipAddress: "192.168.1.16/24",
-                gateway: "192.168.1.1",
-                dns: ["8.8.8.8", "8.8.4.4"],
-                interfaces: [
-                    {
-                        name: "eth0",
-                        type: "ethernet",
-                        method: "dhcp"
-                    },
-                    {
-                        name: "wlan0",
-                        type: "wifi",
-                        ssid: "MiFibra-B0FF",
-                        password: "6of5fdJk",
-                        method: "dhcp"
-                    },
-                    {
-                        name: "ppp0",
-                        type: "modem",
-                        method: "ppp",
-                        provider: "vodafone"
-                    }
-                ]
-            },
-            simConfig: {
-                pin: '0000'
-            },
-            services: {
-                virtualHere: {
-                    enabled: true,
-                    port: 7575,
-                    config: null
-                },
-                wireGuard: {
-                    enabled: true,
-                    config: null
-                },
-                sumi: {
-                    enabled: true,
-                    config: {
-
-                    }
-                }
-            }
-        };
+        // Leer archivo template /etc/template_config.json
+        const configTemplate = JSON.parse(fs.readFileSync('/etc/template_config.json', 'utf-8'));
 
         // Escribir el archivo de configuración
         fs.writeFileSync(configFilePath, JSON.stringify(configTemplate, null, 2));
@@ -128,80 +41,6 @@ async function generateConfigFile() {
     }
 }
 
-function restartWireguard() {
-    exec('sudo systemctl restart wg-quick@wg0', (error, stdout, stderr) => {
-        if (error) {
-            console.error('Error reiniciando WireGuard:', error);
-            return res.status(500).send('Error reiniciando WireGuard');
-        }
-    });
-}
-
-
-// Guardar la IP pública y generar archivo de cliente
-async function generateVpnClient(req, res) {
-    try {
-        // Obtener IP pública
-        const response = await fetch('https://api.ipify.org?format=json');
-        const { ip: publicIp } = await response.json();
-
-        // Leer la configuración actual
-        const config = JSON.parse(fs.readFileSync(configFilePath, 'utf-8'));
-
-        // // Leer las claves y configuración del archivo /root/client.conf
-        // const clientConf = fs.readFileSync(clientConfPath, 'utf-8');
-
-        // // Parsear las claves necesarias del archivo /root/client.conf
-        // const privateKeyMatch = clientConf.match(/PrivateKey\s*=\s*(.+)/);
-        // const publicKeyMatch = clientConf.match(/PublicKey\s*=\s*(.+)/);
-        // const presharedKeyMatch = clientConf.match(/PresharedKey\s*=\s*(.+)/);
-
-
-        // if (!privateKeyMatch || !publicKeyMatch || !presharedKeyMatch) {
-        //     throw new Error('No se encontraron las claves en /root/client.conf');
-        // }
-
-        // const privateKey = privateKeyMatch[1].trim();
-        // const publicKey = publicKeyMatch[1].trim();
-        // const presharedKey = presharedKeyMatch[1].trim();
-
-        const { privateKey, publicKey, presharedKey } = extractKeysFromWgConfig();
-
-        // Cambiar la configuración de WireGuard del servidor (no cliente)
-        const wgConfig = fs.readFileSync(wgConfigPath, 'utf-8');
-        const newWgConfig = wgConfig.replace(/Endpoint = .*/, `Endpoint = ${publicIp}:51820`);
-        fs.writeFileSync(wgConfigPath, newWgConfig);
-
-        // Crear archivo de configuración del cliente WireGuard
-        const clientConfig = `[Interface]
-Address = 10.7.0.2/24
-DNS = ${config.vpnConfig.dns}
-PrivateKey = ${privateKey}
-
-[Peer]
-PublicKey = ${publicKey}
-PresharedKey = ${presharedKey}
-AllowedIPs = 0.0.0.0/0, ::/0
-Endpoint = ${publicIp}:51820
-PersistentKeepalive = 25`;
-
-        const clientFileName = `${config.deviceName}.conf`;
-        const clientFilePath = path.join(__dirname, clientFileName);
-        fs.writeFileSync(clientFilePath, clientConfig);
-
-        // Reiniciar WireGuard para aplicar la nueva configuración del servidor
-        restartWireguard();
-
-        // Devolver el archivo de cliente para que el usuario lo descargue
-        res.download(clientFilePath, clientFileName, (err) => {
-            if (err) throw err;
-            fs.unlinkSync(clientFilePath); // Eliminar archivo después de la descarga
-        });
-    } catch (error) {
-        console.error('Error generando cliente VPN:', error);
-        res.status(500).send('Error generando cliente VPN');
-    }
-}
 
 function generateNetplanConfig(config) {
     const netplan = {
@@ -256,67 +95,6 @@ function applyNetplanConfig(config) {
 }
 
 
-app.get('/vpn-logs', (req, res) => {
-
-    // Configuración de headers para Server-Sent Events (SSE)
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
-
-    let lastLogPosition = 0;
-    let logData = '';
-    const sentLogs = [];
-
-    const sendLogUpdate = () => {
-        fs.stat(logFilePath, (err, stats) => {
-            if (err) {
-                console.error('Error al obtener información del archivo de logs:', err);
-                return;
-            }
-
-            if (stats.size > lastLogPosition) {
-                const logStream = fs.createReadStream(logFilePath, {
-                    start: lastLogPosition,
-                    end: stats.size
-                });
-
-                logStream.on('data', (chunk) => {
-                    logData += chunk;
-                });
-
-                logStream.on('end', () => {
-                    const logEntries = logData.split('\n').filter(Boolean).filter(e => e.includes('wireguard:'));  // Dividir en líneas y eliminar vacías
-                    lastLogPosition = stats.size;  // Actualizar la posición para leer solo nuevos logs
-
-                    logEntries.forEach((entry) => {
-                        if (!sentLogs.includes(entry)) {
-                            res.write(`data: ${entry}\n\n`);  // Enviar cada línea de log al cliente
-                            sentLogs.push(entry);
-                        }
-                    });
-
-                    logData = '';  // Limpiar la variable después de enviar
-                });
-
-                logStream.on('error', (error) => {
-                    console.error('Error al leer el archivo de logs:', error);
-                });
-            }
-        });
-    };
-
-    // Enviar logs cada 3 segundos
-    const intervalId = setInterval(() => {
-        sendLogUpdate();
-    }, 3000);
-
-    // Manejar cierre de la conexión
-    req.on('close', () => {
-        console.log('Conexión cerrada por el cliente.');
-        clearInterval(intervalId);
-        res.end();
-    });
-});
 // // Ruta para acceder a los logs en tiempo real
 // app.get('/sys-logs', (req, res) => {
 //     res.setHeader('Content-Type', 'text/event-stream');
@@ -425,9 +203,6 @@ app.get('/virtualhere/:action', (req, res) => {
     }
 });
 
-// Descargar archivo de cliente
-app.get('/download-vpn-client', generateVpnClient);
-
 // Endpoint para obtener el nombre del dispositivo desde el archivo de configuración
 app.get('/get-device-name', (req, res) => {
     try {
@@ -521,10 +296,6 @@ app.get('/set-device-name', express.json(), (req, res) => {
     }
 });
 
-// Ruta para reiniciar WireGuard después de la configuración
-app.get('/restart-wireguard', (req, res) => {
-    restartWireguard()
-});
 
 app.get('/check-first-run', (req, res) => {
     try {
@@ -634,22 +405,6 @@ app.get('/system-status', (req, res) => {
     });
 });
 
-app.get('/vpn-status', (req, res) => {
-    exec('sudo wg show', (error, stdout, stderr) => {
-        if (error) {
-            console.error(`Error al consultar el estado de la VPN: ${error.message}`);
-            return res.json({ success: false, error: error.message, message: 'Error al consultar la VPN.' });
-        }
-        res.json({
-            success: true,
-            active: true,
-            port: stdout.match(/listening\s*port:\s*(.+)/)[1],
-            interface: stdout.match(/interface:\s*(.+)/)[1],
-            allowedIPs: stdout.match(/allowed\s*ips:\s*(.+)/)[1]
-        });
-    });
-});
-
 // Endpoint para guardar la contraseña en el archivo de configuración
 app.get('/set-password', async (req, res) => {
     const { password } = req.body;
@@ -711,17 +466,6 @@ app.listen(PORT, () => {
 
     if (!fs.existsSync(configFilePath)) {
         generateConfigFile();
-    }
-    else {
-        const config = JSON.parse(fs.readFileSync(configFilePath, 'utf-8'));
-        if (config.vpnConfig.privateKey === '' || config.vpnConfig.publicKey === '' || config.vpnConfig.presharedKey === '') {
-            const { privateKey, publicKey, presharedKey } = extractKeysFromWgConfig();
-            config.vpnConfig.privateKey = privateKey;
-            config.vpnConfig.publicKey = publicKey;
-            config.vpnConfig.presharedKey = presharedKey;
-            fs.writeFileSync(configFilePath, JSON.stringify(config, null, 2));
-            restartWireguard();
-        }
     }
 
     try {

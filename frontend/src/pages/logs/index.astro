@@ -4,81 +4,45 @@ import Layout from "../../layouts/Layout.astro";
 ---
 
 <Layout title="Panel de administración">
-    <Navbar />
-    <main class="p-8 w-full">
-        <h1 class="text-4xl font-extrabold mb-6 text-gray-800">Registros</h1>
-        <p class="text-lg text-gray-600">
-            Logs y registros del sistema o conexiones VPN
-        </p>
+  <Navbar />
+  <main class="p-8 w-full">
+    <h1 class="text-4xl font-extrabold mb-6 text-gray-800">Registros</h1>
+    <p class="text-lg text-gray-600">
+      Logs y registros del sistema o conexiones VPN
+    </p>
 
-        <section class="pb-12 pt-4">
-            <div class="mt-6">
-                <h2 class="text-lg font-semibold pb-4">Registros VPN</h2>
-                <div id="vpn-logs" class="flex items-center">
-                    <textarea
-                        readonly
-                        name="vpnlogs"
-                        id="vpnlogs-textarea"
-                        class="overflow-auto w-full max-w-screen max-h-[500px] h-full min-h-[500px] min-w-full rounded-xl bg-[#ddd] overflow-x-hidden resize-none border-1 border-[#AAA] outline-none"
-                    ></textarea>
-                </div>
-            </div>
-        </section>
-        <section class="pb-12 pt-4">
-            <div class="mt-6">
-                <h2 class="text-lg font-semibold pb-4">
-                    Registros del sistema
-                </h2>
-                <div id="sys-logs" class="flex items-center">
-                    <textarea
-                        readonly
-                        name="syslogs"
-                        id="syslogs-textarea"
-                        class="overflow-auto w-full max-w-screen max-h-[500px] h-full min-h-[500px] min-w-full rounded-xl bg-[#ddd] overflow-x-hidden resize-none border-1 border-[#AAA] outline-none"
-                    ></textarea>
-                </div>
-            </div>
-        </section>
-        <script defer>
-            const vpnLogsTextArea = document.getElementById("vpnlogs-textarea");
+    <section class="pb-12 pt-4">
+      <div class="mt-6">
+        <h2 class="text-lg font-semibold pb-4">Registros del sistema</h2>
+        <div id="sys-logs" class="flex items-center">
+          <textarea
+            readonly
+            name="syslogs"
+            id="syslogs-textarea"
+            class="overflow-auto w-full max-w-screen max-h-[500px] h-full min-h-[500px] min-w-full rounded-xl bg-[#ddd] overflow-x-hidden resize-none border-1 border-[#AAA] outline-none"
+          ></textarea>
+        </div>
+      </div>
+    </section>
+    <script defer>
+      const sysLogsTextArea = document.getElementById("syslogs-textarea");
 
-            const vpnEventSource = new EventSource("/api/vpn-logs");
+      const sysEventSource = new EventSource("/api/sys-logs");
 
-            vpnEventSource.onmessage = function (event) {
-                vpnLogsTextArea.textContent += "\n" + event.data;
-                vpnLogsTextArea.scrollTop = vpnLogsTextArea.scrollHeight;
-            };
+      sysEventSource.onmessage = function (event) {
+        sysLogsTextArea.textContent += "\n" + event.data;
+        sysLogsTextArea.scrollTop = sysLogsTextArea.scrollHeight;
+      };
 
-            vpnEventSource.onerror = function (event) {
-                vpnLogsTextArea.textContent +=
-                    "ERROR EN LA CONEXIÓN AL SERVIDOR";
-                console.error("Error en la conexión", event);
-                vpnLogsTextArea.scrollTop = vpnLogsTextArea.scrollHeight;
-            };
+      sysEventSource.onerror = function (event) {
+        sysLogsTextArea.textContent += "ERROR EN LA CONEXIÓN AL SERVIDOR";
+        console.error("Error en la conexión", event);
+        sysLogsTextArea.scrollTop = sysLogsTextArea.scrollHeight;
+      };
 
-            window.onclose = () => {
-                vpnEventSource.close();
-            };
-
-            const sysLogsTextArea = document.getElementById("syslogs-textarea");
-
-            const sysEventSource = new EventSource("/api/sys-logs");
-
-            sysEventSource.onmessage = function (event) {
-                sysLogsTextArea.textContent += "\n" + event.data;
-                sysLogsTextArea.scrollTop = sysLogsTextArea.scrollHeight;
-            };
-
-            sysEventSource.onerror = function (event) {
-                sysLogsTextArea.textContent +=
-                    "ERROR EN LA CONEXIÓN AL SERVIDOR";
-                console.error("Error en la conexión", event);
-                sysLogsTextArea.scrollTop = sysLogsTextArea.scrollHeight;
-            };
-
-            window.onclose = () => {
-                sysEventSource.close();
-            };
-        </script>
-    </main>
+      window.onclose = () => {
+        sysEventSource.close();
+      };
+    </script>
+  </main>
 </Layout>
